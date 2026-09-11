@@ -1,0 +1,162 @@
+/* Pitch Black & Crisp White Design System */
+:root {
+  --bg-main: #000000;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #121212;
+  --border-color: #222222;
+  --border-light: #333333;
+  --text-primary: #ffffff;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+}
+
+body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #000000;
+}
+::-webkit-scrollbar-thumb {
+  background: #262626;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #404040;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Tab button styling - Pure Monochrome */
+.tab-btn {
+  color: #888888;
+  background-color: transparent;
+  border: 1px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.tab-btn:hover {
+  color: #ffffff;
+  background-color: #141414;
+}
+.tab-btn.active {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+  font-weight: 600;
+}
+
+#tab-ai.active {
+  color: #000000 !important;
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Terminal Log Level Highlighting - Monochrome High Contrast */
+.log-line {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+.log-error {
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12);
+  padding: 1px 4px;
+  border-left: 2px solid #ffffff;
+}
+.log-warn {
+  color: #e4e4e7 !important;
+  font-weight: 500;
+}
+.log-info {
+  color: #a1a1aa;
+}
+.log-chat {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+.log-dash {
+  color: #71717a !important;
+  font-style: italic;
+}
+
+/* Pulse animation for running status - White glow */
+@keyframes pulse-white {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0);
+  }
+}
+
+.pulse-active {
+  animation: pulse-white 2s infinite;
+}
+
+/* Mod switch toggle - Black & White */
+.mod-toggle {
+  appearance: none;
+  width: 36px;
+  height: 20px;
+  background-color: #262626;
+  border-radius: 9999px;
+  position: relative;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.2s;
+  border: 1px solid #333333;
+}
+.mod-toggle:checked {
+  background-color: #ffffff;
+  border-color: #ffffff;
+}
+.mod-toggle::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #71717a;
+  transition: transform 0.2s;
+}
+.mod-toggle:checked::before {
+  background-color: #000000;
+  transform: translateX(16px);
+}
+
+/* AI message markdown & command chip */
+.cmd-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #141414;
+  border: 1px solid #333333;
+  color: #ffffff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cmd-chip:hover {
+  background-color: #ffffff;
+  border-color: #ffffff;
+  color: #000000;
+  transform: translateY(-1px);
+}
