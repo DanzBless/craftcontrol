@@ -1540,6 +1540,136 @@ async function savePropertiesSettings(e) {
   }
 }
 
+// ================= LANGUAGE & LOCALIZATION (i18n) =================
+let currentLang = localStorage.getItem('craftorbit_lang') || 'en';
+
+const i18nDictionary = {
+  en: {
+    layout_pref_title: "Dashboard Layout & Navigation Preference",
+    layout_pref_desc: "Choose your preferred dashboard navigation style. Your preference is automatically remembered across sessions.",
+    layout_sidebar_title: "Left Sidebar (Argonara / Pterodactyl)",
+    layout_sidebar_desc: "Full-height vertical sidebar on the left with General, Management, and Palette categories. Gives your workspace maximum horizontal breathing room.",
+    layout_topbar_title: "Top Horizontal Tabs",
+    layout_topbar_desc: "Compact horizontal tab strip across the top header. Best for compact displays or classic minimalist view.",
+    lang_pref_title: "Language & Localization",
+    lang_pref_desc: "Select your preferred interface display language. Changes take effect instantly across all panels.",
+    toast_invite_copied: "Copied full multiplayer invite message!",
+    toast_lang_changed: "Language changed to English (US)",
+    invite_header: "🎮 Join our Minecraft Server!",
+    invite_server: "🏷️ Server",
+    invite_how_to: "👉 How to Connect:\n1. Open Minecraft -> Multiplayer / Servers\n2. Direct Connection / Add Server\n3. Enter the server address -> Connect & Play!"
+  },
+  id: {
+    layout_pref_title: "Tata Letak Dashboard & Pilihan Navigasi",
+    layout_pref_desc: "Pilih gaya navigasi dashboard sesuai kenyamanan Anda. Pilihan disimpan otomatis di browser.",
+    layout_sidebar_title: "Sidebar Kiri (Gaya Argonara / Pterodactyl)",
+    layout_sidebar_desc: "Menu vertikal lengkap di sisi kiri dengan kategori General, Management, dan Quick Palette. Area workspace lebih leluasa.",
+    layout_topbar_title: "Tab Horizontal Atas",
+    layout_topbar_desc: "Menu horizontal ringkas di bagian atas header. Cocok untuk layar kompak atau tampilan minimalis klasik.",
+    lang_pref_title: "Bahasa & Lokalisasi",
+    lang_pref_desc: "Pilih bahasa tampilan antarmuka. Perubahan langsung aktif seketika tanpa perlu restart.",
+    toast_invite_copied: "Berhasil menyalin pesan mabar lengkap!",
+    toast_lang_changed: "Bahasa diubah ke Bahasa Indonesia",
+    invite_header: "🎮 Ayo Mabar Minecraft!",
+    invite_server: "🏷️ Server",
+    invite_how_to: "👉 Cara Connect:\n1. Buka Minecraft -> Multiplayer / Servers\n2. Direct Connection / Add Server\n3. Masukkan address sesuai koneksimu -> Join!"
+  }
+};
+
+function initLanguage() {
+  setLanguage(currentLang, false);
+}
+
+function toggleLangDropdown(event) {
+  if (event) event.stopPropagation();
+  const menu = document.getElementById('langDropdown');
+  if (menu) menu.classList.toggle('hidden');
+}
+
+function setLanguage(lang, showNotification = true) {
+  currentLang = lang;
+  localStorage.setItem('craftorbit_lang', lang);
+
+  // Close dropdown
+  const menu = document.getElementById('langDropdown');
+  if (menu) menu.classList.add('hidden');
+
+  // Update badges
+  const headerBadge = document.getElementById('headerLangBadge');
+  const sidebarBadge = document.getElementById('sidebarLangCode');
+  if (headerBadge) headerBadge.textContent = lang.toUpperCase();
+  if (sidebarBadge) sidebarBadge.textContent = lang.toUpperCase();
+
+  // Update Dropdown Checks
+  const checkEn = document.getElementById('langCheck-en');
+  const checkId = document.getElementById('langCheck-id');
+  if (checkEn) {
+    checkEn.textContent = lang === 'en' ? '✓' : '';
+    checkEn.className = lang === 'en' ? 'text-emerald-400 font-bold text-[11px]' : 'text-neutral-600 text-[11px]';
+  }
+  if (checkId) {
+    checkId.textContent = lang === 'id' ? '✓' : '';
+    checkId.className = lang === 'id' ? 'text-emerald-400 font-bold text-[11px]' : 'text-neutral-600 text-[11px]';
+  }
+
+  // Update Settings Tab Cards
+  const cardEn = document.getElementById('langCardEn');
+  const cardId = document.getElementById('langCardId');
+  const checkSettingEn = document.getElementById('langSettingCheck-en');
+  const checkSettingId = document.getElementById('langSettingCheck-id');
+
+  if (cardEn && cardId) {
+    if (lang === 'en') {
+      cardEn.classList.add('border-emerald-500', 'bg-[#0f181f]');
+      cardEn.classList.remove('border-[#2e2e2e]', 'bg-black');
+      if (checkSettingEn) {
+        checkSettingEn.textContent = 'ACTIVE';
+        checkSettingEn.className = 'text-emerald-400 text-xs font-mono font-bold';
+      }
+      cardId.classList.remove('border-emerald-500', 'bg-[#0f181f]');
+      cardId.classList.add('border-[#2e2e2e]', 'bg-black');
+      if (checkSettingId) {
+        checkSettingId.textContent = 'SELECT';
+        checkSettingId.className = 'text-neutral-500 text-xs font-mono';
+      }
+    } else {
+      cardId.classList.add('border-emerald-500', 'bg-[#0f181f]');
+      cardId.classList.remove('border-[#2e2e2e]', 'bg-black');
+      if (checkSettingId) {
+        checkSettingId.textContent = 'ACTIVE';
+        checkSettingId.className = 'text-emerald-400 text-xs font-mono font-bold';
+      }
+      cardEn.classList.remove('border-emerald-500', 'bg-[#0f181f]');
+      cardEn.classList.add('border-[#2e2e2e]', 'bg-black');
+      if (checkSettingEn) {
+        checkSettingEn.textContent = 'SELECT';
+        checkSettingEn.className = 'text-neutral-500 text-xs font-mono';
+      }
+    }
+  }
+
+  // Update DOM elements with data-i18n
+  const dict = i18nDictionary[lang] || i18nDictionary['en'];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) {
+      el.textContent = dict[key];
+    }
+  });
+
+  if (showNotification) {
+    showToast(dict.toast_lang_changed || 'Language updated', 'info');
+  }
+}
+
+// Global click outside listener to close dropdowns
+window.addEventListener('click', (e) => {
+  const langMenu = document.getElementById('langDropdown');
+  if (langMenu && !langMenu.contains(e.target) && !e.target.closest('button[onclick*="toggleLangDropdown"]')) {
+    langMenu.classList.add('hidden');
+  }
+});
+
 // ================= LAYOUT MODE SWITCHER (SIDEBAR vs TOPBAR) =================
 let currentLayoutMode = localStorage.getItem('craftorbit_layout_mode') || 'sidebar';
 
@@ -1620,6 +1750,7 @@ function setLayoutMode(mode, showNotification = true) {
 
 // Initial Load
 window.addEventListener('DOMContentLoaded', () => {
+  initLanguage();
   initLayoutMode();
   initTelemetryCharts();
   connectWebSocket();
@@ -2533,11 +2664,16 @@ function copyShareInvite() {
   const globalSec = (isTunnelActive && javaAddr) ? `🌐 Internet (playit.gg):\n👉 PC: ${javaAddr}\n👉 Mobile Bedrock: ${bedrockAddr}:${bedrockPort}\n\n` : '';
   const lanSec = `🏠 Same Wi-Fi (LAN):\n👉 PC: ${cachedLocalIp}:${port}\n👉 Mobile Bedrock: ${cachedLocalIp}:19132\n\n`;
 
-  const inviteText = `🎮 Ayo Mabar Minecraft!\n🏷️ Server: ${serverName} (${engine})\n\n${globalSec}${lanSec}👉 Cara Connect:\n1. Buka Minecraft -> Multiplayer / Servers\n2. Direct Connection / Add Server\n3. Masukkan address sesuai koneksimu -> Join!`;
+  const dict = (i18nDictionary && i18nDictionary[currentLang]) ? i18nDictionary[currentLang] : i18nDictionary['en'];
+  const inviteHeader = dict.invite_header || '🎮 Join our Minecraft Server!';
+  const inviteServerLabel = dict.invite_server || '🏷️ Server';
+  const inviteHowTo = dict.invite_how_to || '👉 How to Connect:\n1. Open Minecraft -> Multiplayer / Servers\n2. Direct Connection / Add Server\n3. Enter the server address -> Connect & Play!';
+
+  const inviteText = `${inviteHeader}\n${inviteServerLabel}: ${serverName} (${engine})\n\n${globalSec}${lanSec}${inviteHowTo}`;
 
   navigator.clipboard.writeText(inviteText).then(() => {
     playSound('cmd');
-    showToast('Berhasil salin pesan mabar lengkap!', 'success');
+    showToast(dict.toast_invite_copied || 'Copied multiplayer invite message!', 'success');
   });
 }
 
