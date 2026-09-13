@@ -293,3 +293,47 @@ input:focus, select:focus, textarea:focus {
   color: #fbbf24;
   border: 1px solid rgba(245, 158, 11, 0.25);
 }
+
+/* ==========================================================================
+   Left Sidebar Navigation Layout (Argonara / Pterodactyl Style)
+   ========================================================================== */
+.sidebar-tab-btn {
+  color: #94a3b8;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-weight: 500;
+  position: relative;
+}
+.sidebar-tab-btn:hover {
+  color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
+}
+.sidebar-tab-btn.active {
+  color: #ffffff !important;
+  background-color: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.3) !important;
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+}
+.sidebar-tab-btn.active i {
+  color: #38bdf8 !important;
+}
+
+/* Mode Switch Layout Specifics */
+#appShell.mode-sidebar #leftSidebar {
+  display: flex !important;
+}
+#appShell.mode-sidebar #topNavTabs {
+  display: none !important;
+}
+
+#appShell.mode-topbar #leftSidebar {
+  display: none !important;
+}
+#appShell.mode-topbar #topNavTabs {
+  display: flex !important;
+}
+

@@ -129,13 +129,27 @@ function switchTab(tabId) {
   tabs.forEach(t => {
     const view = document.getElementById(`view-${t}`);
     const btn = document.getElementById(`tab-${t}`);
-    if (view && btn) {
+    const sideBtn = document.getElementById(`side-tab-${t}`);
+
+    if (view) {
       if (t === tabId) {
         view.classList.remove('hidden');
-        btn.classList.add('active');
       } else {
         view.classList.add('hidden');
+      }
+    }
+    if (btn) {
+      if (t === tabId) {
+        btn.classList.add('active');
+      } else {
         btn.classList.remove('active');
+      }
+    }
+    if (sideBtn) {
+      if (t === tabId) {
+        sideBtn.classList.add('active');
+      } else {
+        sideBtn.classList.remove('active');
       }
     }
   });
@@ -938,6 +952,8 @@ async function loadModsList() {
     document.getElementById('modStatDisabled').textContent = data.disabledCount;
     document.getElementById('modStatSize').textContent = formatBytes(data.totalBytes);
     document.getElementById('badgeModCount').textContent = data.totalCount;
+    const sideModBadge = document.getElementById('sidebarBadgeModCount');
+    if (sideModBadge) sideModBadge.textContent = data.totalCount;
 
     const countSubtab = document.getElementById('modSubtabCount');
     if (countSubtab) countSubtab.textContent = data.totalCount;
@@ -1524,8 +1540,87 @@ async function savePropertiesSettings(e) {
   }
 }
 
+// ================= LAYOUT MODE SWITCHER (SIDEBAR vs TOPBAR) =================
+let currentLayoutMode = localStorage.getItem('craftorbit_layout_mode') || 'sidebar';
+
+function initLayoutMode() {
+  setLayoutMode(currentLayoutMode, false);
+}
+
+function toggleLayoutMode() {
+  const newMode = currentLayoutMode === 'sidebar' ? 'topbar' : 'sidebar';
+  setLayoutMode(newMode, true);
+}
+
+function setLayoutMode(mode, showNotification = true) {
+  currentLayoutMode = mode;
+  localStorage.setItem('craftorbit_layout_mode', mode);
+
+  const appShell = document.getElementById('appShell');
+  const headerLayoutLabel = document.getElementById('headerLayoutLabel');
+  const layoutModeLabel = document.getElementById('layoutModeLabel');
+  const cardSidebar = document.getElementById('layoutCardSidebar');
+  const cardTopbar = document.getElementById('layoutCardTopbar');
+  const checkSidebar = document.getElementById('layoutCheckSidebar');
+  const checkTopbar = document.getElementById('layoutCheckTopbar');
+
+  if (appShell) {
+    if (mode === 'sidebar') {
+      appShell.classList.add('mode-sidebar');
+      appShell.classList.remove('mode-topbar');
+    } else {
+      appShell.classList.add('mode-topbar');
+      appShell.classList.remove('mode-sidebar');
+    }
+  }
+
+  if (headerLayoutLabel) {
+    headerLayoutLabel.textContent = mode === 'sidebar' ? 'Sidebar Mode' : 'Top Bar Mode';
+  }
+  if (layoutModeLabel) {
+    layoutModeLabel.textContent = mode === 'sidebar' ? 'Sidebar' : 'Top Bar';
+  }
+
+  if (cardSidebar && cardTopbar) {
+    if (mode === 'sidebar') {
+      cardSidebar.classList.add('border-emerald-500', 'bg-[#0f181f]');
+      cardSidebar.classList.remove('border-[#2e2e2e]', 'bg-black');
+      if (checkSidebar) {
+        checkSidebar.textContent = 'ACTIVE';
+        checkSidebar.className = 'text-emerald-400 text-xs font-mono font-bold';
+      }
+      cardTopbar.classList.remove('border-emerald-500', 'bg-[#0f181f]');
+      cardTopbar.classList.add('border-[#2e2e2e]', 'bg-black');
+      if (checkTopbar) {
+        checkTopbar.textContent = 'SELECT';
+        checkTopbar.className = 'text-neutral-500 text-xs font-mono';
+      }
+    } else {
+      cardTopbar.classList.add('border-emerald-500', 'bg-[#0f181f]');
+      cardTopbar.classList.remove('border-[#2e2e2e]', 'bg-black');
+      if (checkTopbar) {
+        checkTopbar.textContent = 'ACTIVE';
+        checkTopbar.className = 'text-emerald-400 text-xs font-mono font-bold';
+      }
+      cardSidebar.classList.remove('border-emerald-500', 'bg-[#0f181f]');
+      cardSidebar.classList.add('border-[#2e2e2e]', 'bg-black');
+      if (checkSidebar) {
+        checkSidebar.textContent = 'SELECT';
+        checkSidebar.className = 'text-neutral-500 text-xs font-mono';
+      }
+    }
+  }
+
+  if (window.lucide) lucide.createIcons();
+
+  if (showNotification) {
+    showToast(mode === 'sidebar' ? 'Switched to Left Sidebar Navigation' : 'Switched to Top Navigation Bar', 'info');
+  }
+}
+
 // Initial Load
 window.addEventListener('DOMContentLoaded', () => {
+  initLayoutMode();
   initTelemetryCharts();
   connectWebSocket();
   loadInstances();
@@ -1551,12 +1646,18 @@ async function loadInstances() {
     allInstances = data.instances || [];
     activeInstanceData = data.activeInstance;
 
-    // Update Header
+    // Update Header & Sidebar
+    const sideName = document.getElementById('sidebarInstanceName');
+    const sideBadge = document.getElementById('sidebarInstanceTypeBadge');
+
     if (activeInstanceData && activeInstanceData.id !== 'none') {
       document.getElementById('headerInstanceName').textContent = activeInstanceData.name;
       const typeBadge = document.getElementById('headerInstanceTypeBadge');
       typeBadge.textContent = activeInstanceData.detectedEngine || activeInstanceData.type.toUpperCase();
       
+      if (sideName) sideName.textContent = activeInstanceData.name;
+      if (sideBadge) sideBadge.textContent = activeInstanceData.detectedEngine || activeInstanceData.type.toUpperCase();
+
       const folderName = activeInstanceData.path.split(/[/\\]/).pop();
       document.getElementById('headerServerFolder').textContent = folderName;
       document.getElementById('headerServerFolder').title = activeInstanceData.path;
@@ -1567,6 +1668,8 @@ async function loadInstances() {
     } else {
       document.getElementById('headerInstanceName').textContent = 'No Server Selected';
       document.getElementById('headerInstanceTypeBadge').textContent = 'START';
+      if (sideName) sideName.textContent = 'No Server Selected';
+      if (sideBadge) sideBadge.textContent = 'START';
       document.getElementById('headerServerFolder').textContent = 'Click Host World to begin';
       document.getElementById('headerServerIp').textContent = 'localhost:25565';
     }
@@ -2144,21 +2247,26 @@ async function installGeyserToActiveServer() {
 function updatePlayitUI(data) {
   playitState = { ...playitState, ...data };
 
-  // Header Pill
+  // Header Pill & Sidebar Dot
   const dot = document.getElementById('playitStatusDot');
+  const sideDot = document.getElementById('sidebarPlayitDot');
   const headerStatus = document.getElementById('playitHeaderStatus');
   if (dot && headerStatus) {
     if (playitState.status === 'running') {
-      dot.className = 'w-2 h-2 rounded-full bg-white pulse-active';
+      dot.className = 'w-2 h-2 rounded-full bg-emerald-400 pulse-active';
+      if (sideDot) sideDot.className = 'w-2 h-2 rounded-full bg-emerald-400 pulse-active';
       headerStatus.textContent = playitState.publicAddress ? `Global: ${playitState.publicAddress}` : 'Tunnel: Online';
     } else if (playitState.status === 'claiming') {
-      dot.className = 'w-2 h-2 rounded-full bg-white animate-ping';
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+      if (sideDot) sideDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
       headerStatus.textContent = 'Link Account';
     } else if (playitState.status === 'starting') {
-      dot.className = 'w-2 h-2 rounded-full bg-neutral-400 animate-ping';
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+      if (sideDot) sideDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
       headerStatus.textContent = 'Tunnel: Starting';
     } else {
       dot.className = 'w-2 h-2 rounded-full bg-neutral-600';
+      if (sideDot) sideDot.className = 'w-2 h-2 rounded-full bg-neutral-600';
       headerStatus.textContent = 'Tunnel: Off';
     }
   }
