@@ -1,16 +1,22 @@
 const fs = require('fs');
 const path = require('path');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const util = require('util');
-const execPromise = util.promisify(exec);
+const execFilePromise = util.promisify(execFile);
 
 class StorageManager {
   constructor(serverDir) {
-    this.serverDir = serverDir;
+    this.serverDir = path.resolve(serverDir);
   }
 
   setDirectory(newDir) {
-    this.serverDir = newDir;
+    this.serverDir = path.resolve(newDir);
+  }
+
+  isSafePath(targetPath) {
+    const resolvedTarget = path.resolve(this.serverDir, targetPath);
+    const rel = path.relative(this.serverDir, resolvedTarget);
+    return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
   }
 
   async getDirectorySize(dirPath) {
@@ -267,10 +273,10 @@ class StorageManager {
   }
 
   async deleteFile(relativePath) {
-    const safePath = path.normalize(path.join(this.serverDir, relativePath));
-    if (!safePath.startsWith(this.serverDir)) {
-      throw new Error('Access denied');
+    if (!this.isSafePath(relativePath)) {
+      throw new Error('Access denied: path traversal blocked');
     }
+    const safePath = path.resolve(this.serverDir, relativePath);
     if (!fs.existsSync(safePath)) {
       throw new Error('File does not exist');
     }
@@ -304,8 +310,7 @@ class StorageManager {
     const backupFileName = `backup-${targetFolder}-${timestamp}.zip`;
     const backupFilePath = path.join(backupsDir, backupFileName);
 
-    const cmd = `tar -a -c -f "${backupFilePath}" "${targetFolder}"`;
-    await execPromise(cmd, { cwd: this.serverDir });
+    await execFilePromise('tar', ['-a', '-c', '-f', backupFilePath, targetFolder], { cwd: this.serverDir });
 
     const stat = await fs.promises.stat(backupFilePath);
     return {
@@ -316,12 +321,12 @@ class StorageManager {
   }
 
   async restoreBackup(backupFileName) {
-    const backupFilePath = path.join(this.serverDir, 'backups', backupFileName);
+    const cleanFileName = path.basename(backupFileName);
+    const backupFilePath = path.join(this.serverDir, 'backups', cleanFileName);
     if (!fs.existsSync(backupFilePath)) {
-      throw new Error(`Backup file not found: ${backupFileName}`);
+      throw new Error(`Backup file not found: ${cleanFileName}`);
     }
 
-    // Determine target folder (world or worlds)
     let targetFolder = 'world';
     if (!fs.existsSync(path.join(this.serverDir, 'world')) && fs.existsSync(path.join(this.serverDir, 'worlds'))) {
       targetFolder = 'worlds';
@@ -330,30 +335,24 @@ class StorageManager {
     const worldPath = path.join(this.serverDir, targetFolder);
     const tempBackupWorld = path.join(this.serverDir, `${targetFolder}_pre_restore_${Date.now()}`);
 
-    // If current world exists, preserve it temporarily
     if (fs.existsSync(worldPath)) {
       try {
         await fs.promises.rename(worldPath, tempBackupWorld);
       } catch (e) {
-        // Fallback remove
         await fs.promises.rm(worldPath, { recursive: true, force: true });
       }
     }
 
     try {
-      // Extract backup archive
-      const extractCmd = `tar -x -f "${backupFilePath}"`;
-      await execPromise(extractCmd, { cwd: this.serverDir });
+      await execFilePromise('tar', ['-x', '-f', backupFilePath], { cwd: this.serverDir });
 
-      // Clean up temp backup if restore succeeded
       if (fs.existsSync(tempBackupWorld)) {
         await fs.promises.rm(tempBackupWorld, { recursive: true, force: true }).catch(() => {});
       }
 
       const sizeInfo = await this.getDirectorySize(worldPath);
-      return { success: true, fileName: backupFileName, restoredSize: sizeInfo.size };
+      return { success: true, fileName: cleanFileName, restoredSize: sizeInfo.size };
     } catch (err) {
-      // Rollback if extract failed
       if (fs.existsSync(tempBackupWorld)) {
         await fs.promises.rename(tempBackupWorld, worldPath).catch(() => {});
       }

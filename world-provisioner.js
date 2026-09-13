@@ -2,9 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
 const os = require('os');
-const { exec } = require('child_process');
+const { execFile } = require('child_process');
 const util = require('util');
-const execPromise = util.promisify(exec);
+const execFilePromise = util.promisify(execFile);
 const JavaResolver = require('./java-resolver');
 
 class WorldProvisioner {
@@ -408,10 +408,9 @@ class WorldProvisioner {
       const targetWorldDir = path.join(serverDir, 'world');
       onLog(`[Auto-Host] Copying existing world files into ${targetWorldDir}...`);
       
-      // Robocopy for high speed on Windows
-      const copyCmd = `robocopy "${worldPath}" "${targetWorldDir}" /E /NP /NFL /NDL /NJH /NJS`;
+      // Robocopy for high speed on Windows using execFile (no shell interpolation)
       try {
-        await execPromise(copyCmd);
+        await execFilePromise('robocopy', [worldPath, targetWorldDir, '/E', '/NP', '/NFL', '/NDL', '/NJH', '/NJS']);
       } catch (e) {
         if (e.code > 7) {
           await fs.promises.cp(worldPath, targetWorldDir, { recursive: true });

@@ -1,4 +1,4 @@
-const { spawn, exec } = require('child_process');
+const { spawn, exec, execFile } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
@@ -470,7 +470,7 @@ class MinecraftServer {
   kill() {
     if (this.pid) {
       this.appendLog(`[CraftControl] Force terminating PID ${this.pid}...`);
-      exec(`taskkill /PID ${this.pid} /T /F`, () => {});
+      execFile('taskkill', ['/PID', String(this.pid), '/T', '/F'], () => {});
       this.setStatus('offline');
       this.process = null;
       return { success: true };
@@ -501,7 +501,7 @@ class MinecraftServer {
       throw new Error('Process stdin not available');
     }
 
-    const cleanCmd = cmd.trim().replace(/^\//, '');
+    const cleanCmd = cmd.trim().replace(/^\//, '').replace(/[\r\n]/g, '');
     this.appendLog(`> /${cleanCmd}`);
     this.process.stdin.write(cleanCmd + '\n');
     return { success: true };

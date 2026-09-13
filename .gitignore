@@ -16,5 +16,6 @@ backups/
 .env
 playit-config.json
 playit.toml
+.ngodingpakeai/
 
 dashboard-config.json

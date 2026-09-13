@@ -105,7 +105,36 @@ if (activeInstance.tunnel) {
   playit.setInstance(activeInstance.id, activeInstance.tunnel);
 }
 
+// Helper to verify directory traversal boundaries safely
+function isSafeSubpath(baseDir, targetPath) {
+  if (!baseDir || !targetPath) return false;
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedTarget = path.resolve(baseDir, targetPath);
+  const rel = path.relative(resolvedBase, resolvedTarget);
+  return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel));
+}
+
 app.use(express.json());
+
+// Security: Cross-Site Request Forgery (CSRF) & DNS-Rebinding Protection
+app.use((req, res, next) => {
+  if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    const origin = req.headers.origin;
+    const host = req.headers.host;
+    if (origin) {
+      try {
+        const originUrl = new URL(origin);
+        if (originUrl.host !== host && !['localhost', '127.0.0.1'].includes(originUrl.hostname)) {
+          return res.status(403).json({ error: 'Cross-site request forgery blocked' });
+        }
+      } catch (e) {
+        return res.status(403).json({ error: 'Invalid Origin header' });
+      }
+    }
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 function getLocalIpAddress() {
@@ -141,8 +170,22 @@ function broadcast(msg) {
   });
 }
 
-// WebSocket handling
-wss.on('connection', (ws) => {
+// WebSocket handling with CSWSH protection
+wss.on('connection', (ws, req) => {
+  const origin = req.headers.origin;
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      if (originUrl.host !== req.headers.host && !['localhost', '127.0.0.1'].includes(originUrl.hostname)) {
+        ws.close(1008, 'Cross-origin WebSocket blocked');
+        return;
+      }
+    } catch (e) {
+      ws.close(1008, 'Invalid Origin');
+      return;
+    }
+  }
+
   ws.send(JSON.stringify({
     type: 'status',
     data: { ...mc.getStatus(), instanceName: activeInstance.name, localIp: getLocalIpAddress() }
@@ -887,8 +930,8 @@ app.get('/api/storage/backups', async (req, res) => {
 });
 
 app.get('/api/storage/download-backup/:name', (req, res) => {
-  const fileName = req.params.name;
-  if (fileName.includes('..') || fileName.includes('/') || fileName.includes('\\')) {
+  const fileName = path.basename(req.params.name);
+  if (!fileName || fileName.startsWith('.')) {
     return res.status(403).json({ error: 'Invalid file name' });
   }
   const filePath = path.join(activeInstance.path, 'backups', fileName);
@@ -926,16 +969,17 @@ app.get('/api/server/ping', async (req, res) => {
 
 // --- 9ROUTER AI ASSISTANT API ---
 const NINEROUTER_URL = process.env.NINEROUTER_URL || 'http://localhost:20128';
-const NINEROUTER_KEY = process.env.NINEROUTER_KEY || 'sk-1cc8d01b1bd9bb40-1wc13b-a088122e';
-const NINEROUTER_MODEL = 'ag/gemini-3.8-flash-low';
+const NINEROUTER_KEY = process.env.NINEROUTER_KEY || '';
+const NINEROUTER_MODEL = process.env.NINEROUTER_MODEL || 'ag/gemini-3.8-flash-low';
 
 async function call9RouterAI(messages) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (NINEROUTER_KEY) {
+    headers['Authorization'] = `Bearer ${NINEROUTER_KEY}`;
+  }
   const response = await fetch(`${NINEROUTER_URL}/v1/chat/completions`, {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${NINEROUTER_KEY}`,
-      'Content-Type': 'application/json'
-    },
+    headers,
     body: JSON.stringify({
       model: NINEROUTER_MODEL,
       messages,
@@ -1189,12 +1233,18 @@ app.post('/api/players/action', (req, res) => {
     const { action, player, reason } = req.body;
     if (!action) return res.status(400).json({ error: 'Action required' });
 
+    if (action !== 'broadcast') {
+      if (!player || !/^[a-zA-Z0-9_]{1,16}$/.test(player)) {
+        return res.status(400).json({ error: 'Invalid player name: must be alphanumeric (1-16 chars)' });
+      }
+    }
+
     let cmd = '';
     switch (action) {
       case 'op': cmd = `op ${player}`; break;
       case 'deop': cmd = `deop ${player}`; break;
-      case 'kick': cmd = `kick ${player} ${reason || 'Kicked by administrator'}`; break;
-      case 'ban': cmd = `ban ${player} ${reason || 'Banned by administrator'}`; break;
+      case 'kick': cmd = `kick ${player} ${String(reason || 'Kicked by administrator').replace(/[\r\n]/g, ' ')}`; break;
+      case 'ban': cmd = `ban ${player} ${String(reason || 'Banned by administrator').replace(/[\r\n]/g, ' ')}`; break;
       case 'pardon': cmd = `pardon ${player}`; break;
       case 'whitelist_add': cmd = `whitelist add ${player}`; break;
       case 'whitelist_remove': cmd = `whitelist remove ${player}`; break;
@@ -1208,7 +1258,11 @@ app.post('/api/players/action', (req, res) => {
       case 'gm_survival': cmd = `gamemode survival ${player}`; break;
       case 'gm_spectator': cmd = `gamemode spectator ${player}`; break;
       case 'tp_spawn': cmd = `teleport ${player} 0 100 0`; break;
-      case 'broadcast': cmd = `tellraw @a {"text":"[Server Admin] ${reason || ''}","color":"gold"}`; break;
+      case 'broadcast': {
+        const cleanMsg = String(reason || '').replace(/["\\]/g, '').replace(/[\r\n]/g, ' ');
+        cmd = `tellraw @a {"text":"[Server Admin] ${cleanMsg}","color":"gold"}`;
+        break;
+      }
       default: return res.status(400).json({ error: `Unknown action: ${action}` });
     }
 
@@ -1257,10 +1311,10 @@ app.post('/api/config/properties', (req, res) => {
 app.get('/api/files', async (req, res) => {
   try {
     const relPath = req.query.path || '';
-    const safePath = path.normalize(path.join(activeInstance.path, relPath));
-    if (!safePath.startsWith(activeInstance.path)) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (relPath && !isSafeSubpath(activeInstance.path, relPath)) {
+      return res.status(403).json({ error: 'Access denied: path traversal blocked' });
     }
+    const safePath = path.resolve(activeInstance.path, relPath);
 
     const entries = await fs.promises.readdir(safePath, { withFileTypes: true });
     const items = [];
@@ -1297,10 +1351,10 @@ app.get('/api/file-content', async (req, res) => {
   try {
     const relPath = req.query.path;
     if (!relPath) return res.status(400).json({ error: 'Path required' });
-    const safePath = path.normalize(path.join(activeInstance.path, relPath));
-    if (!safePath.startsWith(activeInstance.path)) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!isSafeSubpath(activeInstance.path, relPath)) {
+      return res.status(403).json({ error: 'Access denied: path traversal blocked' });
     }
+    const safePath = path.resolve(activeInstance.path, relPath);
 
     const stat = await fs.promises.stat(safePath);
     if (stat.size > 2 * 1024 * 1024) {
@@ -1320,10 +1374,10 @@ app.post('/api/file-content', async (req, res) => {
     if (!relPath || content === undefined) {
       return res.status(400).json({ error: 'Path and content required' });
     }
-    const safePath = path.normalize(path.join(activeInstance.path, relPath));
-    if (!safePath.startsWith(activeInstance.path)) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (!isSafeSubpath(activeInstance.path, relPath)) {
+      return res.status(403).json({ error: 'Access denied: path traversal blocked' });
     }
+    const safePath = path.resolve(activeInstance.path, relPath);
 
     await fs.promises.writeFile(safePath, content, 'utf8');
     res.json({ success: true, path: relPath });
