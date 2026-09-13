@@ -325,17 +325,17 @@ class WorldProvisioner {
     const geyserDest = path.join(pluginsDir, 'Geyser-Spigot.jar');
     const floodgateDest = path.join(pluginsDir, 'floodgate-spigot.jar');
 
-    // 1. Check local tools folder first if bundled
-    const localTools = path.join(__dirname, 'tools');
-    const localGeyser = path.join(localTools, 'Geyser-Spigot.jar');
-    const localFloodgate = path.join(localTools, 'floodgate-spigot.jar');
+    // 1. Check local desktop first for fast offline install
+    const localDesktop = 'C:\\Users\\msi_9\\OneDrive\\Desktop\\Antigravity IDE\\Dekstop';
+    const localGeyser = path.join(localDesktop, 'Geyser-Spigot.jar');
+    const localFloodgate = path.join(localDesktop, 'floodgate-spigot.jar');
 
     if (fs.existsSync(localGeyser) && !fs.existsSync(geyserDest)) {
-      onLog('[Geyser Installer] Copying Geyser-Spigot.jar from local cache...');
+      onLog('[Geyser Installer] Copying Geyser-Spigot.jar from local desktop cache...');
       await fs.promises.copyFile(localGeyser, geyserDest);
     }
     if (fs.existsSync(localFloodgate) && !fs.existsSync(floodgateDest)) {
-      onLog('[Geyser Installer] Copying floodgate-spigot.jar from local cache...');
+      onLog('[Geyser Installer] Copying floodgate-spigot.jar from local desktop cache...');
       await fs.promises.copyFile(localFloodgate, floodgateDest);
     }
 
@@ -388,7 +388,7 @@ class WorldProvisioner {
     } = options;
     const mcVersion = this.normalizeVersion(options.mcVersion || '26.2');
 
-    const baseHostingDir = path.join(__dirname, 'hosted-servers');
+    const baseHostingDir = path.resolve('C:\\Users\\msi_9\\OneDrive\\Desktop\\Antigravity IDE\\Dekstop\\hosted-servers');
     if (!fs.existsSync(baseHostingDir)) {
       await fs.promises.mkdir(baseHostingDir, { recursive: true });
     }

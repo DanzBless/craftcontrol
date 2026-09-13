@@ -19,9 +19,33 @@ const CONFIG_FILE = path.join(__dirname, 'dashboard-config.json');
 
 // Helper to load registry
 function loadRegistry() {
+  const defaultDir = path.resolve('C:\\Users\\msi_9\\OneDrive\\Desktop\\Antigravity IDE\\Dekstop\\server world');
+  const bedrockDir = path.resolve('C:\\Users\\msi_9\\OneDrive\\Desktop\\Antigravity IDE\\Dekstop\\bedrock server');
+
   let defaultRegistry = {
-    activeInstanceId: null,
-    instances: []
+    activeInstanceId: 'cisco-carpg',
+    instances: [
+      {
+        id: 'cisco-carpg',
+        name: 'Cisco CARPG Ultimate',
+        path: defaultDir,
+        type: 'forge',
+        minRam: '4G',
+        maxRam: '6G',
+        javaPath: 'C:\\Users\\msi_9\\.gradle\\jdks\\eclipse_adoptium-17-amd64-windows.2\\bin\\java.exe',
+        autoRestart: false
+      },
+      {
+        id: 'bedrock-server',
+        name: 'Aether Legends (Bedrock)',
+        path: bedrockDir,
+        type: 'bedrock',
+        minRam: '2G',
+        maxRam: '4G',
+        javaPath: '',
+        autoRestart: false
+      }
+    ]
   };
 
   if (fs.existsSync(CONFIG_FILE)) {
@@ -902,17 +926,16 @@ app.get('/api/server/ping', async (req, res) => {
 
 // --- 9ROUTER AI ASSISTANT API ---
 const NINEROUTER_URL = process.env.NINEROUTER_URL || 'http://localhost:20128';
-const NINEROUTER_KEY = process.env.NINEROUTER_KEY || '';
-const NINEROUTER_MODEL = process.env.NINEROUTER_MODEL || 'ag/gemini-3.8-flash-low';
+const NINEROUTER_KEY = process.env.NINEROUTER_KEY || 'sk-1cc8d01b1bd9bb40-1wc13b-a088122e';
+const NINEROUTER_MODEL = 'ag/gemini-3.8-flash-low';
 
 async function call9RouterAI(messages) {
-  const headers = { 'Content-Type': 'application/json' };
-  if (NINEROUTER_KEY) {
-    headers['Authorization'] = `Bearer ${NINEROUTER_KEY}`;
-  }
   const response = await fetch(`${NINEROUTER_URL}/v1/chat/completions`, {
     method: 'POST',
-    headers,
+    headers: {
+      'Authorization': `Bearer ${NINEROUTER_KEY}`,
+      'Content-Type': 'application/json'
+    },
     body: JSON.stringify({
       model: NINEROUTER_MODEL,
       messages,

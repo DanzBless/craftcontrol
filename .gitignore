@@ -16,3 +16,5 @@ backups/
 .env
 playit-config.json
 playit.toml
+
+dashboard-config.json

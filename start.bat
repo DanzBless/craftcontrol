@@ -1,23 +1,21 @@
 @echo off
-title CraftControl Server Dashboard
+title Minecraft Server Web Dashboard
 cd /d "%~dp0"
+
+echo =======================================================
+echo   Starting Minecraft Server Web Dashboard...
+echo =======================================================
 
 where node >nul 2>nul
 if %errorlevel% neq 0 (
-    echo [ERROR] Node.js is not installed!
-    echo Please install Node.js from https://nodejs.org
+    echo [ERROR] Node.js is not installed or not in PATH!
     pause
     exit /b 1
 )
 
-if not exist "node_modules\express" (
-    echo [INFO] First run detected. Installing dependencies...
-    call npm install --omit=dev
-)
-
-:: Open default browser to localhost:3000 after 2 seconds
+:: Automatically open localhost browser after 2 seconds in background
 start "" cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
 
-:: Start the CraftControl dashboard server
+:: Start the node server (exiting automatically when shutdown button is clicked)
 node server.js
 exit /b 0
