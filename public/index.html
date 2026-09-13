@@ -558,17 +558,20 @@
               </h2>
               <p class="text-xs text-neutral-400 mt-0.5">Toggle mods on or off without deleting jar files</p>
             </div>
-            <div class="flex items-center gap-2.5">
+            <div class="flex flex-wrap items-center gap-2">
               <input type="file" id="modFileInput" accept=".jar" class="hidden" onchange="handleModFileSelect(event)">
-              <button onclick="document.getElementById('modFileInput').click()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs flex items-center gap-1.5 transition">
-                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Upload .jar
+              <button onclick="document.getElementById('modFileInput').click()" class="px-3 py-1.5 rounded-lg bg-[#141414] hover:bg-[#202020] text-neutral-200 border border-[#333] font-medium text-xs flex items-center gap-1.5 transition">
+                <i data-lucide="upload" class="w-3.5 h-3.5"></i> Add .jar
+              </button>
+              <button onclick="openImportModpackModal()" class="px-3 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs flex items-center gap-1.5 transition">
+                <i data-lucide="archive" class="w-3.5 h-3.5"></i> Import Modpack (.zip)
               </button>
               <div class="relative">
                 <i data-lucide="search" class="w-3.5 h-3.5 absolute left-3 top-2.5 text-neutral-500"></i>
-                <input type="text" id="modSearchInput" oninput="filterModsList()" placeholder="Filter installed mods..." class="bg-black border border-[#262626] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-white w-56">
+                <input type="text" id="modSearchInput" oninput="filterModsList()" placeholder="Filter installed mods..." class="bg-black border border-[#262626] rounded-lg pl-8 pr-3 py-1.5 text-xs text-white focus:outline-none focus:border-white w-48">
               </div>
-              <button onclick="loadModsList()" class="px-3 py-1.5 rounded-lg bg-[#141414] hover:bg-[#202020] text-neutral-300 border border-[#333] text-xs flex items-center gap-1.5 transition">
-                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Refresh
+              <button onclick="loadModsList()" class="p-1.5 rounded-lg bg-[#141414] hover:bg-[#202020] text-neutral-300 border border-[#333] text-xs transition" title="Refresh list">
+                <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
               </button>
             </div>
           </div>
@@ -618,12 +621,16 @@
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-[#222]">
             <div>
               <h3 class="text-sm font-bold text-white flex items-center gap-1.5">
-                <i data-lucide="download-cloud" class="w-4 h-4"></i> Browse & Install Mods from Modrinth
+                <i data-lucide="download-cloud" class="w-4 h-4"></i> Browse & Install from Modrinth
               </h3>
-              <p class="text-xs text-neutral-400">Installs directly into this server's mods directory with matching Minecraft version.</p>
+              <p class="text-xs text-neutral-400">Discover mods & modpacks (Forge, Fabric, NeoForge) matching this server's version.</p>
             </div>
             <form onsubmit="searchModrinthStore(event)" class="flex gap-2">
-              <input type="text" id="modStoreQuery" placeholder="Search mods (e.g. JEI, Waystones, FerriteCore)..." class="bg-black border border-[#262626] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white w-64">
+              <select id="modStoreCatalogType" onchange="searchModrinthStore()" class="bg-black border border-[#262626] rounded-lg px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-white">
+                <option value="mod">Mods (.jar)</option>
+                <option value="modpack">Modpacks</option>
+              </select>
+              <input type="text" id="modStoreQuery" placeholder="Search (e.g. JEI, Cobblemon, Better MC)..." class="bg-black border border-[#262626] rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-white w-56">
               <button type="submit" class="px-3.5 py-1.5 bg-white hover:bg-neutral-200 text-black font-semibold rounded-lg text-xs transition">
                 Search
               </button>
@@ -633,11 +640,12 @@
           <!-- Quick Search Tag Chips -->
           <div class="flex flex-wrap items-center gap-1.5 text-xs">
             <span class="text-neutral-500 text-[11px]">Popular:</span>
-            <button onclick="quickStoreSearch('performance')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px]">⚡ Optimization</button>
-            <button onclick="quickStoreSearch('jei')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px]">📖 JEI / Recipes</button>
-            <button onclick="quickStoreSearch('voice chat')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px]">🎙️ Voice Chat</button>
-            <button onclick="quickStoreSearch('waystones')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px]">🗿 Waystones</button>
-            <button onclick="quickStoreSearch('storage')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px]">📦 Storage</button>
+            <button onclick="quickStoreSearch('cobblemon', 'modpack')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-white hover:text-black border border-[#333] text-neutral-300 text-[11px] transition">⚔️ Cobblemon Pack</button>
+            <button onclick="quickStoreSearch('better mc', 'modpack')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-white hover:text-black border border-[#333] text-neutral-300 text-[11px] transition">🏰 Better MC Pack</button>
+            <button onclick="quickStoreSearch('performance', 'mod')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px] transition">⚡ Optimization</button>
+            <button onclick="quickStoreSearch('jei', 'mod')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px] transition">📖 JEI Recipes</button>
+            <button onclick="quickStoreSearch('voice chat', 'mod')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px] transition">🎙️ Voice Chat</button>
+            <button onclick="quickStoreSearch('waystones', 'mod')" class="px-2.5 py-1 rounded bg-[#111] hover:bg-[#222] border border-[#333] text-neutral-300 text-[11px] transition">🗿 Waystones</button>
           </div>
 
           <!-- Store Grid -->
@@ -1447,6 +1455,48 @@
           <i data-lucide="zap" class="w-3.5 h-3.5 fill-current"></i> Deploy & Host World
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- Import Modpack (.zip) Modal -->
+  <div id="importModpackModal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-[#0a0a0a] border border-[#333] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+      <div class="px-6 py-4 border-b border-[#222] flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-white text-black flex items-center justify-center font-bold">
+            <i data-lucide="archive" class="w-4 h-4"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-sm text-white">Import Modpack Archive (.zip)</h3>
+            <p class="text-[11px] text-neutral-400">Unpacks mods, configs, scripts, and default configs directly into the active server.</p>
+          </div>
+        </div>
+        <button onclick="closeImportModpackModal()" class="text-neutral-400 hover:text-white transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form onsubmit="submitImportModpack(event)" class="p-6 space-y-4 text-xs">
+        <div>
+          <label class="block text-white font-semibold mb-1">Modpack ZIP Path (on your PC)</label>
+          <input type="text" id="importModpackPath" required placeholder="e.g. C:\Downloads\MyModpack-Server.zip" class="w-full bg-black border border-[#262626] rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-white">
+          <p class="text-[11px] text-neutral-500 mt-1">Paste the full path to any CurseForge or Modrinth server-pack ZIP.</p>
+        </div>
+
+        <div id="importModpackProgress" class="hidden p-3 rounded-lg bg-black border border-[#333] text-xs font-mono text-neutral-300 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+          <span>Unpacking modpack files into server folder...</span>
+        </div>
+
+        <div class="pt-3 border-t border-[#222] flex justify-end gap-2">
+          <button type="button" onclick="closeImportModpackModal()" class="px-4 py-2 rounded-lg bg-[#141414] hover:bg-[#202020] text-neutral-300 border border-[#333] text-xs transition">
+            Cancel
+          </button>
+          <button type="submit" id="btnSubmitImportModpack" class="px-5 py-2 rounded-lg bg-white hover:bg-neutral-200 text-black text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="folder-down" class="w-3.5 h-3.5"></i> Extract & Install Modpack
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

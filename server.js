@@ -761,15 +761,31 @@ app.post('/api/mods/upload', express.raw({ type: '*/*', limit: '120mb' }), async
   }
 });
 
+app.post('/api/modpack/import-zip', async (req, res) => {
+  try {
+    const { zipPath } = req.body;
+    if (!zipPath) return res.status(400).json({ error: 'Zip file path required' });
+    const resolvedZip = path.resolve(zipPath);
+    if (!fs.existsSync(resolvedZip)) {
+      return res.status(404).json({ error: `Modpack zip not found: ${resolvedZip}` });
+    }
+    const result = await WorldProvisioner.extractModpackZip(resolvedZip, activeInstance.path, (l) => console.log(`[Modpack] ${l}`));
+    res.json(result);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // --- MODRINTH MOD STORE & INSTALLER API ---
 app.get('/api/modrinth/search', async (req, res) => {
   try {
     const query = req.query.query || '';
     const mcVersion = req.query.version || '';
     const loader = req.query.loader || '';
+    const projectType = req.query.type || 'mod'; // 'mod' or 'modpack'
     const limit = parseInt(req.query.limit, 10) || 12;
 
-    const facets = [['project_type:mod']];
+    const facets = [[`project_type:${projectType}`]];
     if (mcVersion && mcVersion !== 'any') {
       facets.push([`versions:${mcVersion}`]);
     }
@@ -794,7 +810,8 @@ app.get('/api/modrinth/search', async (req, res) => {
       author: h.author,
       iconUrl: h.icon_url,
       downloads: h.downloads,
-      follows: h.follows
+      follows: h.follows,
+      projectType: h.project_type
     }));
 
     res.json({ hits, totalHits: data.total_hits });

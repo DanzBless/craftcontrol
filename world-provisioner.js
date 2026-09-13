@@ -125,6 +125,18 @@ class WorldProvisioner {
       recommendedEgg,
       availableEggs: [
         {
+          id: 'forge',
+          name: 'Forge Modpack Egg',
+          tag: 'Forge Modpacks (RLCraft/ATM/RPG)',
+          desc: 'Automated Forge installer (--installServer) with full mods/ and config/ modpack support.'
+        },
+        {
+          id: 'fabric',
+          name: 'Fabric Modpack Egg',
+          tag: 'Fabric Modpacks (Cobblemon/BetterMC)',
+          desc: 'Lightweight modern modded server. Auto-installs Fabric Server Launcher & Fabric-API.'
+        },
+        {
           id: 'paper',
           name: 'Paper Egg (PaperMC)',
           tag: 'Most Popular & Optimized',
@@ -141,18 +153,6 @@ class WorldProvisioner {
           name: 'Vanilla Java Egg',
           tag: 'Official Mojang',
           desc: 'Official Minecraft server.jar directly from Mojang.'
-        },
-        {
-          id: 'fabric',
-          name: 'Fabric Egg',
-          tag: 'Modern Modded',
-          desc: 'Lightweight modern modded Java server. Auto-downloads Fabric Server Launcher.'
-        },
-        {
-          id: 'forge',
-          name: 'Forge Egg',
-          tag: 'Classic Modded',
-          desc: 'Minecraft Forge for heavy modpacks.'
         }
       ]
     };
@@ -295,8 +295,21 @@ class WorldProvisioner {
       jarUrl = pkg.downloads.server.url;
       targetFileName = 'server.jar';
       onProgress(`Found official Mojang server package. Starting download...`);
+    } else if (egg === 'forge') {
+      onProgress(`Querying Forge Maven promotions for Minecraft ${mcVersion}...`);
+      const promoRes = await fetch('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json');
+      if (!promoRes.ok) throw new Error('Failed to query Forge promotions API');
+      const promoData = await promoRes.json();
+      const forgeVersion = promoData.promos[`${mcVersion}-recommended`] || promoData.promos[`${mcVersion}-latest`];
+      if (!forgeVersion) {
+        throw new Error(`No Forge build found for Minecraft ${mcVersion}. Common Forge versions: 1.20.1, 1.19.2, 1.18.2, 1.16.5.`);
+      }
+
+      jarUrl = `https://maven.minecraftforge.net/net/minecraftforge/forge/${mcVersion}-${forgeVersion}/forge-${mcVersion}-${forgeVersion}-installer.jar`;
+      targetFileName = 'forge-installer.jar';
+      onProgress(`Found Forge ${mcVersion}-${forgeVersion}. Starting installer download...`);
     } else {
-      throw new Error(`Egg '${egg}' requires manual installer setup. Use Paper, Purpur, Fabric, or Vanilla.`);
+      throw new Error(`Egg '${egg}' requires manual installer setup. Use Paper, Purpur, Fabric, Forge, or Vanilla.`);
     }
 
     const outPath = path.join(destFolder, targetFileName);
@@ -309,7 +322,60 @@ class WorldProvisioner {
     await fs.promises.writeFile(outPath, Buffer.from(arrayBuf));
     onProgress(`Downloaded ${targetFileName} successfully (${Math.round(arrayBuf.byteLength / (1024 * 1024))} MB)`);
 
+    // Post-download setup for Forge and Fabric
+    if (egg === 'forge') {
+      const javaPath = JavaResolver.resolveJava(mcVersion);
+      onProgress(`Running Forge installer: ${javaPath} -jar forge-installer.jar --installServer (takes ~1-2 min)...`);
+      try {
+        await execFilePromise(javaPath, ['-jar', 'forge-installer.jar', '--installServer'], { cwd: destFolder });
+        onProgress('Forge server installation completed successfully!');
+        // Clean up installer jar and log
+        await fs.promises.unlink(path.join(destFolder, 'forge-installer.jar')).catch(() => {});
+        await fs.promises.unlink(path.join(destFolder, 'forge-installer.jar.log')).catch(() => {});
+      } catch (err) {
+        throw new Error(`Forge installer failed: ${err.message}`);
+      }
+    } else if (egg === 'fabric') {
+      // Auto-install Fabric-API for Fabric modpacks
+      try {
+        onProgress(`Fetching matching Fabric-API for Minecraft ${mcVersion}...`);
+        const fApiRes = await fetch('https://api.modrinth.com/v2/project/fabric-api/version', {
+          headers: { 'User-Agent': 'CraftControl-Manager/1.0' }
+        });
+        if (fApiRes.ok) {
+          const versions = await fApiRes.json();
+          const match = versions.find(v => v.game_versions.includes(mcVersion) && v.loaders.includes('fabric'));
+          const file = match?.files?.find(f => f.primary) || match?.files?.[0];
+          if (file && file.url) {
+            const modsDir = path.join(destFolder, 'mods');
+            if (!fs.existsSync(modsDir)) await fs.promises.mkdir(modsDir, { recursive: true });
+            const buf = await (await fetch(file.url)).arrayBuffer();
+            await fs.promises.writeFile(path.join(modsDir, file.filename), Buffer.from(buf));
+            onProgress(`Auto-installed ${file.filename} into mods folder.`);
+          }
+        }
+      } catch (e) {}
+    }
+
     return { targetFileName, outPath };
+  }
+
+  // Extract a modpack ZIP archive into server folder
+  static async extractModpackZip(zipFilePath, targetServerDir, onLog = console.log) {
+    if (!fs.existsSync(zipFilePath)) {
+      throw new Error(`Modpack ZIP file not found: ${zipFilePath}`);
+    }
+    onLog(`[Modpack Extractor] Extracting modpack archive into ${targetServerDir}...`);
+    await execFilePromise('tar', ['-x', '-f', zipFilePath, '-C', targetServerDir]);
+
+    let modCount = 0;
+    const modsDir = path.join(targetServerDir, 'mods');
+    if (fs.existsSync(modsDir)) {
+      const files = await fs.promises.readdir(modsDir);
+      modCount = files.filter(f => f.endsWith('.jar') || f.endsWith('.disabled')).length;
+    }
+    onLog(`[Modpack Extractor] Modpack successfully unpacked (${modCount} mods loaded).`);
+    return { success: true, modCount };
   }
 
   // Install Geyser & Floodgate plugins for Bedrock crossplay
@@ -420,10 +486,10 @@ class WorldProvisioner {
       onLog(`[Auto-Host] Fresh world mode selected. Minecraft will generate a new world on first start (seed: ${seed || 'random'}).`);
     }
 
-    // 2. Download Selected Egg Jar
+    // 2. Download Selected Egg Jar (Paper, Purpur, Fabric, Forge, Vanilla)
     let jarInfo = { targetFileName: 'server.jar' };
-    if (egg !== 'bedrock' && egg !== 'forge') {
-      onLog(`[Auto-Host] Provisioning ${egg.toUpperCase()} egg jar for Minecraft ${mcVersion}...`);
+    if (egg !== 'bedrock') {
+      onLog(`[Auto-Host] Provisioning ${egg.toUpperCase()} egg for Minecraft ${mcVersion}...`);
       jarInfo = await this.downloadEggJar(egg, mcVersion, serverDir, onLog);
     }
 
@@ -431,6 +497,12 @@ class WorldProvisioner {
     if (enableGeyser !== false && (egg === 'paper' || egg === 'purpur' || egg === 'spigot')) {
       onLog('[Auto-Host] Auto-installing Geyser & Floodgate plugins for Bedrock / Mobile cross-play...');
       await this.installGeyser(serverDir, onLog);
+    }
+
+    // 2.2 If a modpack ZIP was provided, extract it into the server
+    if (options.modpackZipPath && fs.existsSync(options.modpackZipPath)) {
+      onLog(`[Auto-Host] Unpacking modpack archive: ${path.basename(options.modpackZipPath)}...`);
+      await this.extractModpackZip(options.modpackZipPath, serverDir, onLog);
     }
 
     // 3. Write eula.txt
@@ -461,8 +533,8 @@ class WorldProvisioner {
     const javaPath = JavaResolver.resolveJava(mcVersion);
     onLog(`[Auto-Host] Resolved Java runtime for Minecraft ${mcVersion}: ${javaPath}`);
 
-    // 7. Generate start.bat
-    const startBatContent = `@echo off\ntitle ${cleanName}\ncd /d "%~dp0"\n"${javaPath}" -Xms${minRam} -Xmx${maxRam} -jar ${jarInfo.targetFileName} nogui\npause\n`;
+    // 7. Generate start.bat (supporting Forge run.bat and standard jar launches)
+    const startBatContent = `@echo off\ntitle ${cleanName}\ncd /d "%~dp0"\nif exist "run.bat" (\n    call run.bat\n) else (\n    "${javaPath}" -Xms${minRam} -Xmx${maxRam} -jar ${jarInfo.targetFileName} nogui\n)\npause\n`;
     await fs.promises.writeFile(path.join(serverDir, 'start.bat'), startBatContent, 'utf8');
 
     // 8. Return Instance Config

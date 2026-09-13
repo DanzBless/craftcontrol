@@ -821,39 +821,44 @@ function switchModSubtab(tab) {
 async function searchModrinthStore(e) {
   if (e) e.preventDefault();
   const query = document.getElementById('modStoreQuery')?.value.trim() || '';
+  const catalogType = document.getElementById('modStoreCatalogType')?.value || 'mod';
   const grid = document.getElementById('modStoreResultsGrid');
   if (grid) {
-    grid.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono"><span class="w-2 h-2 rounded-full bg-white animate-ping inline-block mr-2"></span>Searching Modrinth catalog...</div>';
+    grid.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono"><span class="w-2 h-2 rounded-full bg-white animate-ping inline-block mr-2"></span>Searching Modrinth ${catalogType}s...</div>`;
   }
 
   try {
     const version = activeInstanceData?.mcVersion || '';
     const loader = activeInstanceData?.type || '';
-    const res = await fetch(`/api/modrinth/search?query=${encodeURIComponent(query)}&version=${encodeURIComponent(version)}&loader=${encodeURIComponent(loader)}&limit=15`);
+    const res = await fetch(`/api/modrinth/search?query=${encodeURIComponent(query)}&version=${encodeURIComponent(version)}&loader=${encodeURIComponent(loader)}&type=${encodeURIComponent(catalogType)}&limit=15`);
     const data = await res.json();
     modStoreHits = data.hits || [];
-    renderModStoreGrid(modStoreHits);
+    renderModStoreGrid(modStoreHits, catalogType);
   } catch (err) {
     if (grid) {
-      grid.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono">Failed to load Modrinth store: ${err.message}</div>`;
+      grid.innerHTML = `<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono">Failed to load Modrinth catalog: ${err.message}</div>`;
     }
   }
 }
 
-function quickStoreSearch(term) {
+function quickStoreSearch(term, catalogType = 'mod') {
   const input = document.getElementById('modStoreQuery');
+  const typeSelect = document.getElementById('modStoreCatalogType');
   if (input) input.value = term;
+  if (typeSelect && catalogType) typeSelect.value = catalogType;
   searchModrinthStore();
 }
 
-function renderModStoreGrid(hits) {
+function renderModStoreGrid(hits, catalogType = 'mod') {
   const grid = document.getElementById('modStoreResultsGrid');
   if (!grid) return;
 
   if (!hits || hits.length === 0) {
-    grid.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono">No mods found matching your query.</div>';
+    grid.innerHTML = '<div class="col-span-full py-12 text-center text-neutral-500 text-xs font-mono">No items found matching your query.</div>';
     return;
   }
+
+  const isModpack = catalogType === 'modpack';
 
   grid.innerHTML = hits.map(h => `
     <div class="bg-[#0e0e0e] border border-[#222] hover:border-[#3a3a3a] rounded-xl p-3.5 flex flex-col justify-between transition">
@@ -862,15 +867,22 @@ function renderModStoreGrid(hits) {
         <div class="min-w-0 flex-1">
           <div class="flex items-center justify-between gap-1">
             <h4 class="font-bold text-xs text-white truncate" title="${h.title}">${h.title}</h4>
+            ${isModpack ? '<span class="text-[9px] font-mono px-1.5 py-0.2 rounded bg-neutral-900 border border-[#333] text-neutral-300">PACK</span>' : ''}
           </div>
           <p class="text-[11px] text-neutral-400 line-clamp-2 mt-1 leading-snug">${h.description || 'No description provided'}</p>
         </div>
       </div>
       <div class="mt-3 pt-2.5 border-t border-[#1a1a1a] flex items-center justify-between">
         <span class="text-[10px] text-neutral-500 font-mono">📥 ${(h.downloads || 0).toLocaleString()}</span>
-        <button onclick="installModrinthMod('${h.id}', '${h.title.replace(/'/g, "\\'")}')" id="btnInstall-${h.id}" class="px-3 py-1 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs transition flex items-center gap-1">
-          <i data-lucide="download" class="w-3 h-3"></i> Install
-        </button>
+        ${isModpack ? `
+          <a href="https://modrinth.com/modpack/${h.slug || h.id}" target="_blank" class="px-3 py-1 rounded-lg bg-[#141414] hover:bg-[#202020] text-neutral-200 border border-[#333] text-xs transition flex items-center gap-1">
+            <i data-lucide="external-link" class="w-3 h-3"></i> View Pack
+          </a>
+        ` : `
+          <button onclick="installModrinthMod('${h.id}', '${h.title.replace(/'/g, "\\'")}')" id="btnInstall-${h.id}" class="px-3 py-1 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs transition flex items-center gap-1">
+            <i data-lucide="download" class="w-3 h-3"></i> Install
+          </button>
+        `}
       </div>
     </div>
   `).join('');
@@ -1723,6 +1735,18 @@ let currentAutoEggMode = 'existing'; // 'existing' | 'fresh'
 
 const defaultFreshEggs = [
   {
+    id: 'forge',
+    name: 'Forge Modpack Egg',
+    tag: 'Forge Modpacks (RLCraft/ATM/RPG)',
+    desc: 'Automated Forge installer (--installServer) with full mods/ and config/ modpack support.'
+  },
+  {
+    id: 'fabric',
+    name: 'Fabric Modpack Egg',
+    tag: 'Fabric Modpacks (Cobblemon/BetterMC)',
+    desc: 'Lightweight modern modded server. Auto-installs Fabric Server Launcher & Fabric-API.'
+  },
+  {
     id: 'paper',
     name: 'Paper Egg (PaperMC)',
     tag: 'Recommended (Fast & Plugins)',
@@ -1739,12 +1763,6 @@ const defaultFreshEggs = [
     name: 'Vanilla Java Egg',
     tag: 'Official Mojang',
     desc: 'Official Minecraft server.jar directly from Mojang.'
-  },
-  {
-    id: 'fabric',
-    name: 'Fabric Egg',
-    tag: 'Modern Modded',
-    desc: 'Lightweight modern modded Java server. Auto-downloads Fabric Server Launcher.'
   }
 ];
 
@@ -2492,9 +2510,58 @@ const paletteActions = [
   { id: 'purge-logs', title: 'Clear Old Compressed Logs', cat: 'Storage', icon: 'trash-2', run: () => cleanOldLogs() },
   { id: 'clean-cache', title: 'Clean Cache & Crash Reports', cat: 'Storage', icon: 'refresh-cw', run: () => cleanCache() },
   { id: 'diagnose', title: 'Run AI Server Diagnosis', cat: 'AI Copilot', icon: 'stethoscope', run: () => runQuickDiagnosis() },
+  { id: 'import-pack', title: 'Import Modpack (.zip)', cat: 'Mods', icon: 'archive', run: () => openImportModpackModal() },
   { id: 'mod-store', title: 'Browse Mod Store (Modrinth)', cat: 'Mods', icon: 'store', run: () => { switchTab('mods'); switchModSubtab('store'); } },
   { id: 'shutdown', title: 'Shutdown Dashboard & Exit', cat: 'System', icon: 'power', run: () => shutdownDashboard() }
 ];
+
+function openImportModpackModal() {
+  document.getElementById('importModpackModal')?.classList.remove('hidden');
+}
+
+function closeImportModpackModal() {
+  document.getElementById('importModpackModal')?.classList.add('hidden');
+  document.getElementById('importModpackProgress')?.classList.add('hidden');
+}
+
+async function submitImportModpack(e) {
+  e.preventDefault();
+  const zipPath = document.getElementById('importModpackPath')?.value.trim();
+  if (!zipPath) return;
+
+  const progress = document.getElementById('importModpackProgress');
+  const btn = document.getElementById('btnSubmitImportModpack');
+  if (progress) progress.classList.remove('hidden');
+  if (btn) {
+    btn.disabled = true;
+    btn.classList.add('opacity-40');
+  }
+
+  try {
+    playSound('cmd');
+    showToast('Unpacking modpack archive into server...', 'info');
+    const res = await fetch('/api/modpack/import-zip', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ zipPath })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    playSound('alert');
+    showToast(`Modpack imported successfully! ${data.modCount} mods loaded.`, 'success');
+    closeImportModpackModal();
+    loadModsList();
+  } catch (err) {
+    showToast(`Import failed: ${err.message}`, 'error');
+  } finally {
+    if (progress) progress.classList.add('hidden');
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('opacity-40');
+    }
+  }
+}
 
 function openCommandPalette() {
   const modal = document.getElementById('commandPaletteModal');
@@ -2561,6 +2628,7 @@ document.addEventListener('keydown', (e) => {
     closeCommandPalette();
     closeAutoEggModal();
     closeAddInstanceModal();
+    closeImportModpackModal();
     closeFileEditor();
   }
 });
