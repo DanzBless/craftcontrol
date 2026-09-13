@@ -378,6 +378,89 @@
     </div>
   </section>
 
+  <!-- Problem & Solution: Why Self-Hosting Was Hard vs How CraftOrbit Solves It -->
+  <section class="py-20 px-6 border-t border-[#161c28] bg-[#05070a]/90 relative overflow-hidden">
+    <div class="max-w-6xl mx-auto space-y-10 relative z-10">
+      <div class="text-center max-w-3xl mx-auto space-y-3">
+        <span class="text-xs font-mono text-neutral-400 tracking-wider">THE SELF-HOSTING DILEMMA</span>
+        <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          Got a great PC, but hosting feels like a nightmare?
+        </h2>
+        <p class="text-neutral-400 text-xs sm:text-base leading-relaxed">
+          You already have a 16ΓÇô64 GB gaming rig sitting on your desk. But hosting a Minecraft server manually used to mean router logins, CGNAT roadblocks, Java version mismatches, and forcing your friends to download sketchy VPNs.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+        <!-- The Old Hard Way -->
+        <div class="p-7 rounded-2xl bg-[#090b10] border border-red-500/20 space-y-5">
+          <div class="flex items-center justify-between font-mono text-xs">
+            <span class="text-red-400 font-bold flex items-center gap-1.5">
+              <span>Γ£ò</span> THE OLD MANUAL WAY
+            </span>
+            <span class="px-2 py-0.5 rounded bg-red-500/10 text-red-400 text-[10px]">FRUSTRATING &amp; SLOW</span>
+          </div>
+
+          <ul class="space-y-3.5 text-xs text-neutral-300 font-mono">
+            <li class="flex items-start gap-2.5">
+              <span class="text-red-400 font-bold">Γ£ò</span>
+              <span><strong>Router &amp; CGNAT Hell:</strong> Logging into 192.168.1.1, fighting ISP port blocks, and exposing your private home IP address to random players.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-red-400 font-bold">Γ£ò</span>
+              <span><strong>Java Version Chaos:</strong> MC 1.21 requires Java 21, MC 1.16 requires Java 8. One wrong PATH setting and your server crashes on launch.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-red-400 font-bold">Γ£ò</span>
+              <span><strong>Forcing Friends to Install VPNs:</strong> Begging your friends to set up Hamachi, Radmin, or Radmin VPN just to connect to your world.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-red-400 font-bold">Γ£ò</span>
+              <span><strong>Mobile &amp; Console Friends Left Out:</strong> Bedrock players on phones, Switch, and Xbox can't join unless you manually compile and configure Geyser.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-red-400 font-bold">Γ£ò</span>
+              <span><strong>Aternos &amp; Free Host Suffering:</strong> 30-minute queue lines, 2 GB RAM throttling, tick lag on modpacks, and automatic shutdowns when empty.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- The CraftOrbit Way -->
+        <div class="p-7 rounded-2xl bg-[#0c1017] border border-emerald-500/30 space-y-5 shadow-[0_0_40px_rgba(16,185,129,0.05)]">
+          <div class="flex items-center justify-between font-mono text-xs">
+            <span class="text-emerald-400 font-bold flex items-center gap-1.5">
+              <span>Γ£ô</span> THE CRAFTORBIT WAY
+            </span>
+            <span class="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 text-[10px]">1-CLICK SIMPLICITY</span>
+          </div>
+
+          <ul class="space-y-3.5 text-xs text-neutral-300 font-mono">
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-bold">Γ£ô</span>
+              <span><strong>Zero Router Setup:</strong> Built-in playit.gg tunnels generate a public <code>*.gl.joinmc.link</code> domain in seconds. Your home IP stays private and DDoS-protected.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-bold">Γ£ô</span>
+              <span><strong>Intelligent Java Resolver:</strong> Scans your system and automatically selects the exact Java runtime (8, 17, 21, or 25) required by your Minecraft version.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-bold">Γ£ô</span>
+              <span><strong>Zero Extra Apps for Friends:</strong> Anyone can join directly through their normal Minecraft multiplayer menu by entering the public tunnel address.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-bold">Γ£ô</span>
+              <span><strong>Automated Bedrock Cross-Play:</strong> Bundled GeyserMC and Floodgate bridge Android, iOS, Xbox, Switch, and PlayStation players into your Java server.</span>
+            </li>
+            <li class="flex items-start gap-2.5">
+              <span class="text-emerald-400 font-bold">Γ£ô</span>
+              <span><strong>Full Unthrottled PC Hardware:</strong> Dedicate 8GB, 16GB, or 32GB of your own RAM and CPU cores with 0s startup, 20.0 TPS, and no idle shutdown.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Section 01: Capabilities / Features (Bento Grid) -->
   <section class="py-24 px-6 border-t border-[#161c28] relative" id="features">
     <div class="max-w-6xl mx-auto space-y-12">
