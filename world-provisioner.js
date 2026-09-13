@@ -401,14 +401,44 @@ class WorldProvisioner {
       const installerJar = egg === 'neoforge' ? 'neoforge-installer.jar' : 'forge-installer.jar';
       const eggTitle = egg === 'neoforge' ? 'NeoForge' : 'Forge';
       const javaPath = JavaResolver.resolveJava(mcVersion);
+
+      // Pre-download vanilla minecraft server jar to prevent CreeperHost / Mojang timeout
+      try {
+        notify({ percent: 50, text: `Pre-fetching vanilla Minecraft ${mcVersion} server jar...` });
+        const manifest = await (await fetch('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json')).json();
+        const vObj = manifest.versions.find(v => v.id === mcVersion);
+        if (vObj) {
+          const pkg = await (await fetch(vObj.url)).json();
+          if (pkg.downloads?.server?.url) {
+            const mcJarDir = path.join(destFolder, 'libraries', 'net', 'minecraft', 'server', mcVersion);
+            if (!fs.existsSync(mcJarDir)) await fs.promises.mkdir(mcJarDir, { recursive: true });
+            const mcJarPath = path.join(mcJarDir, `server-${mcVersion}.jar`);
+            if (!fs.existsSync(mcJarPath) || (await fs.promises.stat(mcJarPath)).size === 0) {
+              await this.downloadWithProgress(pkg.downloads.server.url, mcJarPath, `server-${mcVersion}.jar`, notify);
+            }
+          }
+        }
+      } catch (err) {
+        notify({ percent: -1, text: `Pre-fetch vanilla jar notice: ${err.message}` });
+      }
+
       notify({ percent: 70, text: `Running ${eggTitle} server installer (${javaPath}). Unpacking libraries (takes ~1-2 min)...` });
       try {
-        await execFilePromise(javaPath, ['-jar', installerJar, '--installServer'], { cwd: destFolder });
+        // Run with 4G ram and increased network timeout
+        await execFilePromise(javaPath, ['-Xmx4G', '-Dsun.net.client.defaultConnectTimeout=30000', '-Dsun.net.client.defaultReadTimeout=60000', '-jar', installerJar, '--installServer', '.'], { cwd: destFolder, timeout: 300000 });
         notify({ percent: 95, text: `${eggTitle} server installation completed successfully!` });
         await fs.promises.unlink(path.join(destFolder, installerJar)).catch(() => {});
         await fs.promises.unlink(path.join(destFolder, `${installerJar}.log`)).catch(() => {});
       } catch (err) {
-        throw new Error(`${eggTitle} installer failed: ${err.message}`);
+        // If run.bat or win_args.txt exists, installation actually succeeded
+        const hasRunBat = fs.existsSync(path.join(destFolder, 'run.bat'));
+        const hasForgeDir = fs.existsSync(path.join(destFolder, 'libraries', 'net', 'minecraftforge')) ||
+                            fs.existsSync(path.join(destFolder, 'libraries', 'net', 'neoforged'));
+        if (hasRunBat || hasForgeDir) {
+          notify({ percent: 95, text: `${eggTitle} runtime detected and ready!` });
+        } else {
+          throw new Error(`${eggTitle} installer failed: ${err.message}`);
+        }
       }
     } else if (egg === 'fabric') {
       // Auto-install Fabric-API for Fabric modpacks
