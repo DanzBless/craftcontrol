@@ -1,9 +1,9 @@
 @echo off
-title CraftControl - Setup
+title CraftOrbit - Setup
 cd /d "%~dp0"
 
 echo =======================================================
-echo          CraftControl - Quick Setup Wizard
+echo          CraftOrbit - Quick Setup Wizard
 echo =======================================================
 echo.
 
@@ -21,7 +21,7 @@ echo [1/2] Installing dependencies (express, ws)...
 call npm install --omit=dev
 
 echo.
-echo [2/2] Setup complete! Launching CraftControl Web Dashboard...
+echo [2/2] Setup complete! Launching CraftOrbit Web Dashboard...
 echo.
 start "" start.bat
 exit /b 0

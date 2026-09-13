@@ -85,7 +85,7 @@ let activeInstance = (registry.instances && registry.instances.length > 0)
   ? (registry.instances.find(i => i.id === registry.activeInstanceId) || registry.instances[0])
   : DUMMY_INSTANCE;
 
-console.log(`[CraftControl Universal] Initializing with active server: "${activeInstance.name}" (${activeInstance.path})`);
+console.log(`[CraftOrbit Universal] Initializing with active server: "${activeInstance.name}" (${activeInstance.path})`);
 
 // Instantiate modules
 const storage = new StorageManager(activeInstance.path);
@@ -279,7 +279,7 @@ setInterval(() => {
   if (mc && mc.status === 'online') {
     try {
       mc.sendCommand('save-all');
-      console.log('[CraftControl Auto-Save] Flushed world save to disk.');
+      console.log('[CraftOrbit Auto-Save] Flushed world save to disk.');
     } catch (e) {}
   }
 }, 10 * 60 * 1000);
@@ -366,7 +366,7 @@ app.post('/api/instances/switch', (req, res) => {
     // Switch playit tunnel configuration to this instance
     playit.setInstance(activeInstance.id, activeInstance.tunnel || null);
 
-    console.log(`[CraftControl Universal] Switched active server to: "${activeInstance.name}" (${activeInstance.path})`);
+    console.log(`[CraftOrbit Universal] Switched active server to: "${activeInstance.name}" (${activeInstance.path})`);
 
     // Broadcast new state
     broadcast({ type: 'status', data: { ...mc.getStatus(), instanceName: activeInstance.name } });
@@ -678,7 +678,7 @@ app.post('/api/server/kill', (req, res) => {
 
 app.post('/api/system/shutdown', async (req, res) => {
   try {
-    console.log('[CraftControl] Received shutdown request from web interface...');
+    console.log('[CraftOrbit] Received shutdown request from web interface...');
     res.json({ success: true, message: 'Web dashboard and servers are shutting down cleanly.' });
 
     // 1. Gracefully stop Minecraft server if running
@@ -697,7 +697,7 @@ app.post('/api/system/shutdown', async (req, res) => {
 
     // 3. Gracefully close server and exit process
     setTimeout(() => {
-      console.log('[CraftControl] Exiting process cleanly.');
+      console.log('[CraftOrbit] Exiting process cleanly.');
       server.close(() => {
         process.exit(0);
       });
@@ -800,7 +800,7 @@ app.get('/api/modrinth/search', async (req, res) => {
 
     const url = `https://api.modrinth.com/v2/search?query=${encodeURIComponent(query)}&limit=${limit}&facets=${encodeURIComponent(JSON.stringify(facets))}`;
     const mRes = await fetch(url, {
-      headers: { 'User-Agent': 'CraftControl-Manager/1.0 (contact@craftcontrol.local)' }
+      headers: { 'User-Agent': 'CraftOrbit-Manager/1.0 (contact@craftcontrol.local)' }
     });
     if (!mRes.ok) throw new Error(`Modrinth returned HTTP ${mRes.status}`);
 
@@ -835,7 +835,7 @@ app.post('/api/modrinth/install', async (req, res) => {
     // Fetch version files from Modrinth
     const url = `https://api.modrinth.com/v2/project/${projectId}/version`;
     const vRes = await fetch(url, {
-      headers: { 'User-Agent': 'CraftControl-Manager/1.0 (contact@craftcontrol.local)' }
+      headers: { 'User-Agent': 'CraftOrbit-Manager/1.0 (contact@craftcontrol.local)' }
     });
     if (!vRes.ok) throw new Error(`Failed to fetch versions for mod ${projectId}`);
 
@@ -1021,7 +1021,7 @@ app.post('/api/ai/chat', async (req, res) => {
     if (!message) return res.status(400).json({ error: 'Message required' });
 
     const serverStatus = mc.getStatus();
-    const systemPrompt = `You are the CraftControl Universal AI Copilot, an expert Minecraft server administrator.
+    const systemPrompt = `You are the CraftOrbit Universal AI Copilot, an expert Minecraft server administrator.
 Current Server Profile:
 - Name: "${activeInstance.name}"
 - Engine: ${serverStatus.detectedEngine} (${serverStatus.engineType})
@@ -1409,7 +1409,7 @@ app.post('/api/file-content', async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`=======================================================`);
-  console.log(`🎮 CraftControl Universal Server Manager is Online!`);
+  console.log(`🎮 CraftOrbit Universal Server Manager is Online!`);
   console.log(`🌐 Localhost URL: http://localhost:${PORT}`);
   console.log(`📂 Active Server: [${activeInstance.name}]`);
   console.log(`📁 Directory: ${activeInstance.path}`);

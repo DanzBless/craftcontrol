@@ -445,7 +445,7 @@ class WorldProvisioner {
       try {
         notify({ percent: 75, text: `Fetching matching Fabric-API for Minecraft ${mcVersion}...` });
         const fApiRes = await fetch('https://api.modrinth.com/v2/project/fabric-api/version', {
-          headers: { 'User-Agent': 'CraftControl-Manager/1.0' }
+          headers: { 'User-Agent': 'CraftOrbit-Manager/1.0' }
         });
         if (fApiRes.ok) {
           const versions = await fApiRes.json();
@@ -615,10 +615,10 @@ class WorldProvisioner {
 
     // 4. Write server.properties
     const serverProps = `#Minecraft server properties\n` +
-      `#Provisioned automatically by CraftControl Auto-Egg\n` +
+      `#Provisioned automatically by CraftOrbit Auto-Egg\n` +
       `server-port=${port}\n` +
       `query.port=${port}\n` +
-      `motd=CraftControl Server (${path.basename(serverDir)})\n` +
+      `motd=CraftOrbit Server (${path.basename(serverDir)})\n` +
       `level-name=world\n` +
       `level-seed=${seed || ''}\n` +
       `online-mode=false\n` +

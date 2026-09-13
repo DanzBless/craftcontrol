@@ -1,4 +1,4 @@
-// CraftControl Pro Client Application
+// CraftOrbit Pro Client Application
 let ws = null;
 let currentTab = 'dashboard';
 let currentFilePath = '';
@@ -7,7 +7,7 @@ let commandHistory = [];
 let historyIndex = -1;
 let serverStatus = 'offline';
 let configuredMaxRamBytes = 6 * 1024 * 1024 * 1024; // Default 6GB
-let audioEnabled = localStorage.getItem('craftcontrol_audio') !== 'false';
+let audioEnabled = localStorage.getItem('craftorbit_audio') !== 'false';
 let aiConversationHistory = [];
 let cachedMods = [];
 let cachedLocalIp = '127.0.0.1';
@@ -77,7 +77,7 @@ function playSound(type) {
 
 function toggleAudio() {
   audioEnabled = !audioEnabled;
-  localStorage.setItem('craftcontrol_audio', audioEnabled);
+  localStorage.setItem('craftorbit_audio', audioEnabled);
   const icon = document.getElementById('soundIcon');
   if (icon) {
     icon.setAttribute('data-lucide', audioEnabled ? 'volume-2' : 'volume-x');
@@ -2322,13 +2322,13 @@ function refreshPlayitStatus() {
 
 // ================= SYSTEM SHUTDOWN =================
 async function shutdownDashboard() {
-  if (!confirm('Are you sure you want to shut down the CraftControl Web Dashboard? This will gracefully save and stop any running Minecraft server, stop the tunnel, and close the command prompt.')) {
+  if (!confirm('Are you sure you want to shut down the CraftOrbit Web Dashboard? This will gracefully save and stop any running Minecraft server, stop the tunnel, and close the command prompt.')) {
     return;
   }
 
   try {
     playSound('stop');
-    showToast('Shutting down CraftControl & stopping server...', 'warning');
+    showToast('Shutting down CraftOrbit & stopping server...', 'warning');
     await fetch('/api/system/shutdown', { method: 'POST' });
 
     // Display clean offline screen
@@ -2337,7 +2337,7 @@ async function shutdownDashboard() {
         <div class="w-16 h-16 rounded-2xl bg-[#111] border border-[#333] flex items-center justify-center mb-5">
           <i data-lucide="power" class="w-8 h-8 text-neutral-400"></i>
         </div>
-        <h1 class="text-xl font-bold text-white tracking-tight">CraftControl Offline</h1>
+        <h1 class="text-xl font-bold text-white tracking-tight">CraftOrbit Offline</h1>
         <p class="text-sm text-neutral-400 mt-2 max-w-md">The web dashboard, servers, and background process have been safely terminated.</p>
         <div class="mt-6 p-4 rounded-xl bg-[#0a0a0a] border border-[#222] text-xs font-mono text-neutral-500">
           Command prompt process closed. You may now close this browser tab.

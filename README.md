@@ -1,6 +1,6 @@
-# CraftControl - Universal Minecraft Server Manager & Global Host
+# CraftOrbit - Universal Minecraft Server Manager & Global Host
 
-CraftControl is an open-source, web-based Minecraft server manager with automatic engine provisioning, playit.gg global tunneling, Modrinth mod store integration, real-time telemetry, and an AI server assistant.
+CraftOrbit is an open-source, web-based Minecraft server manager with automatic engine provisioning, playit.gg global tunneling, Modrinth mod store integration, real-time telemetry, and an AI server assistant.
 
 ---
 
@@ -8,7 +8,7 @@ CraftControl is an open-source, web-based Minecraft server manager with automati
 
 ### Prerequisites
 - **Node.js**: [nodejs.org](https://nodejs.org/) (v18+ recommended)
-- **Java**: Java 8, 17, 21, or 25 depending on your Minecraft version. CraftControl will automatically scan your system and choose the best matching runtime.
+- **Java**: Java 8, 17, 21, or 25 depending on your Minecraft version. CraftOrbit will automatically scan your system and choose the best matching runtime.
 
 ### 1-Click Launch (Windows)
 1. Double-click `setup.bat` (or `start.bat`).

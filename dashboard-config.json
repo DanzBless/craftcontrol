@@ -1,4 +1,17 @@
 {
-  "activeInstanceId": null,
-  "instances": []
+  "activeInstanceId": "hosted-1789295029719",
+  "instances": [
+    {
+      "id": "hosted-1789295029719",
+      "name": "Server-1192-6850",
+      "path": "C:\\Users\\msi_9\\OneDrive\\Desktop\\Antigravity IDE\\Dekstop\\hosted-servers\\Server-1192-6850",
+      "type": "forge",
+      "minRam": "2G",
+      "maxRam": "4G",
+      "javaPath": "C:\\Users\\msi_9\\AppData\\Roaming\\ModrinthApp\\meta\\java_versions\\zulu17.62.17-ca-jre17.0.17-win_x64\\bin\\java.exe",
+      "autoRestart": false,
+      "port": 25565,
+      "customJar": "forge-installer.jar"
+    }
+  ]
 }
