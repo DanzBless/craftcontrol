@@ -372,6 +372,86 @@
         </div>
       </div>
 
+      <!-- Server Hero Workspace Card (Pterodactyl / Argonara Style) -->
+      <div id="serverHeroCard" class="p-5 sm:p-6 rounded-2xl glass-panel relative overflow-hidden flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 shadow-2xl">
+        <!-- Left: Voxel Artwork + Details -->
+        <div class="flex items-center gap-4 min-w-0">
+          <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-[#0e131d] border border-white/10 flex items-center justify-center p-2.5 shadow-lg shrink-0">
+            <img src="logo.svg" alt="CraftOrbit Server" class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(56,189,248,0.5)]">
+          </div>
+          <div class="min-w-0 space-y-1.5">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h1 id="heroServerName" class="text-lg sm:text-xl font-black text-white tracking-tight truncate">Survival Server</h1>
+              <span id="heroEngineBadge" class="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-mono text-[10px] font-bold uppercase">PAPER</span>
+              <span id="heroStatusBadge" class="px-2 py-0.5 rounded bg-neutral-900 border border-neutral-800 text-neutral-400 font-mono text-[10px] flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-neutral-600" id="heroStatusDot"></span>
+                <span id="heroStatusText">OFFLINE</span>
+              </span>
+            </div>
+            <!-- Copyable IP Address Pill -->
+            <div class="flex items-center gap-2">
+              <div onclick="copyServerIp()" class="inline-flex items-center gap-2 px-3 py-1 rounded-lg bg-[#07090e] border border-[#1e2738] hover:border-white/30 text-xs font-mono text-neutral-300 hover:text-white cursor-pointer transition group" title="Click to copy IP address">
+                <span class="text-neutral-500">IP:</span>
+                <span id="heroServerIpDisplay" class="font-semibold text-white">localhost:25402</span>
+                <i data-lucide="copy" class="w-3.5 h-3.5 text-neutral-500 group-hover:text-white transition"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle: Metric Progress Bars (CPU, RAM, DISK) -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto lg:min-w-[380px] font-mono text-xs">
+          <!-- CPU Metric -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="cpu" class="w-3 h-3"></i> CPU</span>
+              <span id="heroCpuPercent" class="font-bold text-white">0%</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-[#18202e] overflow-hidden">
+              <div id="heroCpuBar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- RAM Metric -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="activity" class="w-3 h-3"></i> RAM</span>
+              <span id="heroRamUsage" class="font-bold text-white">0 / 6 GB</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-[#18202e] overflow-hidden">
+              <div id="heroRamBar" class="h-full bg-blue-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- DISK Metric -->
+          <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i> DISK</span>
+              <span id="heroDiskUsage" class="font-bold text-white">...</span>
+            </div>
+            <div class="w-full h-1.5 rounded-full bg-[#18202e] overflow-hidden">
+              <div id="heroDiskBar" class="h-full bg-purple-500 rounded-full transition-all duration-300" style="width: 25%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Primary Action Buttons -->
+        <div class="flex items-center gap-2.5 w-full lg:w-auto shrink-0 justify-end">
+          <button onclick="startServer()" id="heroBtnStart" class="px-5 py-2.5 rounded-xl bg-white hover:bg-neutral-200 text-black font-bold text-xs flex items-center gap-2 shadow-lg transition btn-glow">
+            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
+            <span>START</span>
+          </button>
+          <button onclick="restartServer()" id="heroBtnRestart" class="px-4 py-2.5 rounded-xl bg-[#141924] hover:bg-[#1d2535] text-neutral-200 border border-[#2a364a] font-semibold text-xs flex items-center gap-2 transition">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+            <span>RESTART</span>
+          </button>
+          <button onclick="stopServer()" id="heroBtnStop" class="px-4 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold text-xs flex items-center gap-2 transition opacity-50 cursor-not-allowed" disabled>
+            <i data-lucide="square" class="w-4 h-4 fill-current"></i>
+            <span>STOP</span>
+          </button>
+        </div>
+      </div>
+
       <!-- Share Invite Banner (Shown when server is online) -->
       <div id="shareInviteBanner" class="hidden p-5 rounded-2xl bg-white text-black flex flex-col md:flex-row items-start md:items-center justify-between gap-4 shadow-2xl">
         <div class="space-y-2 flex-1">

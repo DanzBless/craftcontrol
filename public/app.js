@@ -429,39 +429,59 @@ function updateServerStatusUI(data) {
   const statusText = document.getElementById('statusText');
   const btnStart = document.getElementById('btnStart');
   const btnStop = document.getElementById('btnStop');
+  const heroStatusText = document.getElementById('heroStatusText');
+  const heroStatusDot = document.getElementById('heroStatusDot');
+  const heroBtnStart = document.getElementById('heroBtnStart');
+  const heroBtnStop = document.getElementById('heroBtnStop');
 
   if (serverStatus === 'online') {
     statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-white text-black border border-white text-xs font-mono font-semibold';
     statusDot.className = 'w-2 h-2 rounded-full bg-black pulse-active';
     statusText.textContent = 'ONLINE';
+    if (heroStatusText) heroStatusText.textContent = 'ONLINE';
+    if (heroStatusDot) heroStatusDot.className = 'w-2 h-2 rounded-full bg-emerald-400 pulse-active';
     btnStart.disabled = true;
     btnStart.classList.add('opacity-40', 'cursor-not-allowed');
     btnStop.disabled = false;
     btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
+    if (heroBtnStart) { heroBtnStart.disabled = true; heroBtnStart.classList.add('opacity-40', 'cursor-not-allowed'); }
+    if (heroBtnStop) { heroBtnStop.disabled = false; heroBtnStop.classList.remove('opacity-50', 'cursor-not-allowed'); }
     if (prevStatus === 'starting') playSound('start');
   } else if (serverStatus === 'starting') {
     statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#181818] border border-[#333] text-xs font-mono text-white';
     statusDot.className = 'w-2 h-2 rounded-full bg-white animate-ping';
     statusText.textContent = 'STARTING...';
+    if (heroStatusText) heroStatusText.textContent = 'STARTING...';
+    if (heroStatusDot) heroStatusDot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
     btnStart.disabled = true;
     btnStart.classList.add('opacity-40', 'cursor-not-allowed');
     btnStop.disabled = false;
     btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
+    if (heroBtnStart) { heroBtnStart.disabled = true; heroBtnStart.classList.add('opacity-40', 'cursor-not-allowed'); }
+    if (heroBtnStop) { heroBtnStop.disabled = false; heroBtnStop.classList.remove('opacity-50', 'cursor-not-allowed'); }
   } else if (serverStatus === 'stopping') {
     statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#141414] border border-[#333] text-xs font-mono text-neutral-400';
     statusDot.className = 'w-2 h-2 rounded-full bg-neutral-400';
     statusText.textContent = 'STOPPING...';
+    if (heroStatusText) heroStatusText.textContent = 'STOPPING...';
+    if (heroStatusDot) heroStatusDot.className = 'w-2 h-2 rounded-full bg-neutral-400';
     btnStart.disabled = true;
     btnStop.disabled = true;
     btnStop.classList.add('opacity-50', 'cursor-not-allowed');
+    if (heroBtnStart) { heroBtnStart.disabled = true; heroBtnStart.classList.add('opacity-40', 'cursor-not-allowed'); }
+    if (heroBtnStop) { heroBtnStop.disabled = true; heroBtnStop.classList.add('opacity-50', 'cursor-not-allowed'); }
   } else {
     statusBadge.className = 'flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#0a0a0a] border border-[#262626] text-xs font-mono text-neutral-400';
     statusDot.className = 'w-2 h-2 rounded-full bg-neutral-600';
     statusText.textContent = 'OFFLINE';
+    if (heroStatusText) heroStatusText.textContent = 'OFFLINE';
+    if (heroStatusDot) heroStatusDot.className = 'w-2 h-2 rounded-full bg-neutral-600';
     btnStart.disabled = false;
     btnStart.classList.remove('opacity-40', 'cursor-not-allowed');
     btnStop.disabled = true;
     btnStop.classList.add('opacity-50', 'cursor-not-allowed');
+    if (heroBtnStart) { heroBtnStart.disabled = false; heroBtnStart.classList.remove('opacity-40', 'cursor-not-allowed'); }
+    if (heroBtnStop) { heroBtnStop.disabled = true; heroBtnStop.classList.add('opacity-50', 'cursor-not-allowed'); }
     if (prevStatus === 'stopping' || prevStatus === 'online') playSound('stop');
   }
 
@@ -540,6 +560,19 @@ function updateTelemetryUI(telemetry) {
 
     recordTelemetryPoint(curRamMB, curCpu);
 
+    // Sync Server Hero Workspace Card
+    const heroCpu = document.getElementById('heroCpuPercent');
+    const heroCpuBar = document.getElementById('heroCpuBar');
+    if (heroCpu) heroCpu.textContent = `${curCpu}%`;
+    if (heroCpuBar) heroCpuBar.style.width = `${Math.min(100, curCpu)}%`;
+
+    const heroRam = document.getElementById('heroRamUsage');
+    const heroRamBar = document.getElementById('heroRamBar');
+    const ramUsageEl = document.getElementById('serverRamUsage');
+    const ramBarEl = document.getElementById('ramBar');
+    if (heroRam && ramUsageEl) heroRam.textContent = ramUsageEl.textContent;
+    if (heroRamBar && ramBarEl) heroRamBar.style.width = ramBarEl.style.width;
+
     if (telemetry.serverPing) {
       const badge = document.getElementById('slpPingBadge');
       if (badge) {
@@ -564,6 +597,11 @@ function updateTelemetryUI(telemetry) {
     document.getElementById('diskPercentText').textContent = `${telemetry.drive.usedPercent}%`;
     document.getElementById('diskBar').style.width = `${telemetry.drive.usedPercent}%`;
     document.getElementById('driveFreeLabel').textContent = `${freeGb} GB`;
+
+    const heroDisk = document.getElementById('heroDiskUsage');
+    const heroDiskBar = document.getElementById('heroDiskBar');
+    if (heroDisk) heroDisk.textContent = `${freeGb} GB Free`;
+    if (heroDiskBar) heroDiskBar.style.width = `${telemetry.drive.usedPercent}%`;
   }
 }
 
@@ -1777,9 +1815,12 @@ async function loadInstances() {
     allInstances = data.instances || [];
     activeInstanceData = data.activeInstance;
 
-    // Update Header & Sidebar
+    // Update Header, Sidebar & Workspace Hero Card
     const sideName = document.getElementById('sidebarInstanceName');
     const sideBadge = document.getElementById('sidebarInstanceTypeBadge');
+    const heroName = document.getElementById('heroServerName');
+    const heroBadge = document.getElementById('heroEngineBadge');
+    const heroIp = document.getElementById('heroServerIpDisplay');
 
     if (activeInstanceData && activeInstanceData.id !== 'none') {
       document.getElementById('headerInstanceName').textContent = activeInstanceData.name;
@@ -1788,6 +1829,8 @@ async function loadInstances() {
       
       if (sideName) sideName.textContent = activeInstanceData.name;
       if (sideBadge) sideBadge.textContent = activeInstanceData.detectedEngine || activeInstanceData.type.toUpperCase();
+      if (heroName) heroName.textContent = activeInstanceData.name;
+      if (heroBadge) heroBadge.textContent = activeInstanceData.detectedEngine || activeInstanceData.type.toUpperCase();
 
       const folderName = activeInstanceData.path.split(/[/\\]/).pop();
       document.getElementById('headerServerFolder').textContent = folderName;
@@ -1796,13 +1839,17 @@ async function loadInstances() {
       // Update port in header if known
       const port = activeInstanceData.port || (activeInstanceData.type === 'bedrock' ? 19132 : 25402);
       document.getElementById('headerServerIp').textContent = `localhost:${port}`;
+      if (heroIp) heroIp.textContent = `localhost:${port}`;
     } else {
       document.getElementById('headerInstanceName').textContent = 'No Server Selected';
       document.getElementById('headerInstanceTypeBadge').textContent = 'START';
       if (sideName) sideName.textContent = 'No Server Selected';
       if (sideBadge) sideBadge.textContent = 'START';
+      if (heroName) heroName.textContent = 'No Server Selected';
+      if (heroBadge) heroBadge.textContent = 'STANDBY';
       document.getElementById('headerServerFolder').textContent = 'Click Host World to begin';
       document.getElementById('headerServerIp').textContent = 'localhost:25565';
+      if (heroIp) heroIp.textContent = 'localhost:25565';
     }
 
     // Render Dropdown List

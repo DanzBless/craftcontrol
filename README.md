@@ -39,6 +39,9 @@ Featuring automated server engine downloading (**Forge, NeoForge, Fabric, Paper,
 | 📦 **Modrinth Mod & Pack Store** | Search and install mods directly from the Modrinth catalog with 1 click. Includes `.zip` modpack importer for CurseForge/Modrinth server packs. |
 | ⏱️ **Real-Time Telemetry & SLP** | Live RAM/CPU charts, native Server List Ping (latency ms & player count), and automated 10-minute world saves (`/save-all`). |
 | 🔄 **1-Click Disaster Recovery** | Full world backup creation (`.zip`) with an instant 1-click restore button. |
+| 🖥️ **Dual Navigation Layouts** | Switch between an **Argonara / Pterodactyl-style Left Sidebar** and a **Minimalist Topbar** anytime with preference persistence. |
+| 🌐 **Multi-Language (i18n)** | Native English display language with 1-click Language Switcher (English US & Bahasa Indonesia). |
+| 📊 **Server Hero Card** | Real-time workspace banner with animated CPU, RAM, and Disk storage progress meters and quick control triggers. |
 | ⌨️ **Spotlight Command Palette** | Press `Ctrl + K` anywhere to trigger server actions, set world time, clear ground lag, and run console commands. |
 | 🔒 **Security Hardened** | Protected against Cross-Site Request Forgery (CSRF/CSWSH), path traversal (CWE-22), and shell command injection. |
 
