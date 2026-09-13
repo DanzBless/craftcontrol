@@ -609,7 +609,7 @@ function updateTelemetryUI(telemetry) {
     if (telemetry.drive && telemetry.drive.total) {
     const freeGb = (telemetry.drive.free / (1024 * 1024 * 1024)).toFixed(1);
     const totalGb = (telemetry.drive.total / (1024 * 1024 * 1024)).toFixed(1);
-    document.getElementById('diskFreeVal').textContent = `${freeGb} GB Free`;
+    document.getElementById('diskFreeVal').textContent = `${freeGb} GB Available`;
     document.getElementById('diskTotalVal').textContent = `Total: ${totalGb} GB (${telemetry.drive.usedPercent}% used)`;
     document.getElementById('diskPercentText').textContent = `${telemetry.drive.usedPercent}%`;
     document.getElementById('diskBar').style.width = `${telemetry.drive.usedPercent}%`;
