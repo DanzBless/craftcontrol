@@ -1738,33 +1738,33 @@ let currentAutoEggMode = 'existing'; // 'existing' | 'fresh'
 const defaultFreshEggs = [
   {
     id: 'forge',
-    name: 'Forge Modpack Egg',
-    tag: 'Forge Modpacks (RLCraft/ATM/RPG)',
-    desc: 'Automated Forge installer (--installServer) with full mods/ and config/ modpack support.'
+    name: 'Forge',
+    tag: 'Classic Modded',
+    desc: 'Minecraft Forge engine for 1.12 - 1.20 modpacks.'
+  },
+  {
+    id: 'neoforge',
+    name: 'NeoForge',
+    tag: 'Modern Modded',
+    desc: 'Official NeoForge engine for 1.20.4+ and 26.x modpacks.'
   },
   {
     id: 'fabric',
-    name: 'Fabric Modpack Egg',
-    tag: 'Fabric Modpacks (Cobblemon/BetterMC)',
-    desc: 'Lightweight modern modded server. Auto-installs Fabric Server Launcher & Fabric-API.'
+    name: 'Fabric',
+    tag: 'Fast Modded',
+    desc: 'Lightweight modern modded server with auto-installed Fabric-API.'
   },
   {
     id: 'paper',
-    name: 'Paper Egg (PaperMC)',
-    tag: 'Recommended (Fast & Plugins)',
-    desc: 'High-performance Java server with anti-lag & Spigot/Bukkit plugins. Vanilla clients can join.'
-  },
-  {
-    id: 'purpur',
-    name: 'Purpur Egg',
-    tag: 'Fast Paper Fork',
-    desc: 'Drop-in replacement for Paper with extra gameplay configs & optimization.'
+    name: 'Paper',
+    tag: 'Fast & Plugins',
+    desc: 'High-performance Java server with Bukkit/Spigot plugins.'
   },
   {
     id: 'vanilla',
-    name: 'Vanilla Java Egg',
+    name: 'Vanilla',
     tag: 'Official Mojang',
-    desc: 'Official Minecraft server.jar directly from Mojang.'
+    desc: 'Clean official Minecraft server without mods.'
   }
 ];
 
