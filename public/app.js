@@ -154,6 +154,23 @@ function switchTab(tabId) {
     }
   });
 
+  // Update Breadcrumb Title in Sidebar Mode
+  const breadcrumbEl = document.getElementById('breadcrumbActiveTitle');
+  const titleMap = {
+    dashboard: 'Workspace Overview',
+    console: 'Live Console',
+    settings: 'Server Settings',
+    ai: 'AI Server Sage',
+    files: 'File Manager',
+    mods: 'Mod Manager',
+    storage: 'Backups & Storage',
+    playit: 'Global Network',
+    players: 'Players & Roster'
+  };
+  if (breadcrumbEl && titleMap[tabId]) {
+    breadcrumbEl.textContent = titleMap[tabId];
+  }
+
   if (tabId === 'storage') {
     loadStorageOverview();
     loadBackups();

@@ -146,11 +146,7 @@
           <button onclick="toggleAudio()" class="p-2 rounded-lg hover:bg-white/5 hover:text-white transition" title="Toggle UI Audio">
             <i data-lucide="volume-2" class="w-4 h-4"></i>
           </button>
-          <button onclick="toggleLangDropdown(event)" class="px-2 py-1 rounded-lg bg-[#0f141e] hover:bg-[#18202c] border border-[#222c3d] text-[11px] text-neutral-300 hover:text-white transition flex items-center gap-1" title="Change Language / Ganti Bahasa">
-            <i data-lucide="languages" class="w-3.5 h-3.5 text-neutral-400"></i>
-            <span id="sidebarLangCode">EN</span>
-          </button>
-          <button onclick="toggleLayoutMode()" class="px-2 py-1 rounded-lg bg-[#0f141e] hover:bg-[#18202c] border border-[#222c3d] text-[11px] text-neutral-300 hover:text-white transition flex items-center gap-1" title="Switch between Sidebar and Topbar navigation">
+          <button onclick="toggleLayoutMode()" class="px-2.5 py-1.5 rounded-lg bg-[#0f141e] hover:bg-[#18202c] border border-[#222c3d] text-[11px] text-neutral-300 hover:text-white transition flex items-center gap-1.5" title="Switch to Top Navigation Bar">
             <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
             <span id="layoutModeLabel">Sidebar</span>
           </button>
@@ -167,8 +163,8 @@
   <!-- Top Navigation Bar -->
   <header class="bg-black/95 backdrop-blur border-b border-[#222222] sticky top-0 z-40 px-6 py-2.5">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
-      <!-- Brand & Server Instance Switcher -->
-      <div class="flex items-center gap-3">
+      <!-- Brand & Server Instance Switcher (Shown in Topbar mode) -->
+      <div id="headerBrandSwitcher" class="flex items-center gap-3">
         <a href="/" class="flex items-center gap-2.5 group">
           <img src="logo.svg" alt="CraftOrbit" class="w-9 h-9 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.4)] transition group-hover:scale-105">
         </a>
@@ -211,16 +207,23 @@
         </div>
       </div>
 
+      <!-- Breadcrumb Bar (Shown in Sidebar mode) -->
+      <div id="headerBreadcrumb" class="hidden items-center gap-2 font-mono text-xs text-neutral-400">
+        <span class="text-neutral-500 flex items-center gap-1.5"><i data-lucide="layout-dashboard" class="w-4 h-4 text-white"></i> CraftOrbit</span>
+        <span class="text-neutral-600">/</span>
+        <span id="breadcrumbActiveTitle" class="text-white font-semibold">Workspace Overview</span>
+      </div>
+
       <!-- Live Status Pill & Quick Controls -->
       <div class="flex items-center gap-2.5">
-        <!-- Layout Switcher Button (Sidebar vs Topbar) -->
-        <button onclick="toggleLayoutMode()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0e0e0e] border border-[#222] hover:border-[#444] text-xs font-mono text-neutral-300 hover:text-white transition" title="Toggle Navigation Layout (Left Sidebar / Top Bar)">
+        <!-- Layout Switcher Button -->
+        <button onclick="toggleLayoutMode()" id="headerLayoutBtn" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0e0e0e] border border-[#222] hover:border-[#444] text-xs font-mono text-neutral-300 hover:text-white transition" title="Toggle Navigation Layout (Left Sidebar / Top Bar)">
           <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
           <span id="headerLayoutLabel" class="hidden lg:inline text-[11px]">Sidebar Mode</span>
         </button>
 
         <!-- Quick Command Palette Button -->
-        <button onclick="openCommandPalette()" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0e0e0e] border border-[#222] hover:border-[#444] text-xs font-mono text-neutral-400 hover:text-white transition" title="Open Command Palette (Ctrl+K)">
+        <button onclick="openCommandPalette()" id="headerCmdPalette" class="hidden md:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#0e0e0e] border border-[#222] hover:border-[#444] text-xs font-mono text-neutral-400 hover:text-white transition" title="Open Command Palette (Ctrl+K)">
           <i data-lucide="command" class="w-3.5 h-3.5"></i>
           <span class="text-[11px]">Command Palette</span>
           <kbd class="px-1 py-0.2 rounded bg-black border border-[#333] text-[9px]">Ctrl K</kbd>
@@ -269,19 +272,21 @@
           <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Host World
         </button>
 
-        <!-- Quick Start/Stop Buttons -->
-        <button id="btnStart" onclick="startServer()" class="px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs flex items-center gap-1.5 transition">
-          <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Start
-        </button>
-        <button id="btnStop" onclick="stopServer()" class="px-4 py-1.5 rounded-lg bg-[#141414] hover:bg-[#222] text-neutral-200 border border-[#333] font-medium text-xs flex items-center gap-1.5 transition opacity-50 cursor-not-allowed" disabled>
-          <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> Stop
-        </button>
-        <button id="btnRestart" onclick="restartServer()" class="p-1.5 rounded-lg bg-[#0a0a0a] hover:bg-[#161616] text-neutral-300 border border-[#222] font-medium text-xs transition" title="Restart Server">
-          <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-        </button>
-        <button id="btnKill" onclick="killServer()" class="p-1.5 rounded-lg bg-[#0a0a0a] hover:bg-neutral-900 text-neutral-400 hover:text-white border border-[#262626] font-medium text-xs transition" title="Force Kill Process">
-          <i data-lucide="zap-off" class="w-4 h-4"></i>
-        </button>
+        <!-- Quick Start/Stop Buttons (Shown in Topbar mode) -->
+        <div id="headerPowerActions" class="flex items-center gap-2">
+          <button id="btnStart" onclick="startServer()" class="px-4 py-1.5 rounded-lg bg-white hover:bg-neutral-200 text-black font-semibold text-xs flex items-center gap-1.5 transition">
+            <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i> Start
+          </button>
+          <button id="btnStop" onclick="stopServer()" class="px-4 py-1.5 rounded-lg bg-[#141414] hover:bg-[#222] text-neutral-200 border border-[#333] font-medium text-xs flex items-center gap-1.5 transition opacity-50 cursor-not-allowed" disabled>
+            <i data-lucide="square" class="w-3.5 h-3.5 fill-current"></i> Stop
+          </button>
+          <button id="btnRestart" onclick="restartServer()" class="p-1.5 rounded-lg bg-[#0a0a0a] hover:bg-[#161616] text-neutral-300 border border-[#222] font-medium text-xs transition" title="Restart Server">
+            <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+          </button>
+          <button id="btnKill" onclick="killServer()" class="p-1.5 rounded-lg bg-[#0a0a0a] hover:bg-neutral-900 text-neutral-400 hover:text-white border border-[#262626] font-medium text-xs transition" title="Force Kill Process">
+            <i data-lucide="zap-off" class="w-4 h-4"></i>
+          </button>
+        </div>
 
         <div class="h-5 w-px bg-[#222]"></div>
 
@@ -523,8 +528,8 @@
         </div>
       </div>
 
-      <!-- Hardware Telemetry Meters -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Hardware Telemetry Meters (Visible in Topbar mode, hidden in Sidebar mode to avoid duplication) -->
+      <div id="hardwareMetersRow" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Server RAM -->
         <div class="bg-[#0a0a0a] border border-[#222] rounded-xl p-4 flex flex-col justify-between">
           <div class="flex items-center justify-between text-neutral-400 text-xs">

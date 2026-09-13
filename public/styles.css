@@ -322,11 +322,29 @@ input:focus, select:focus, textarea:focus {
   color: #38bdf8 !important;
 }
 
-/* Mode Switch Layout Specifics */
+/* Mode Switch Layout Specifics (Decluttered & Non-Redundant) */
 #appShell.mode-sidebar #leftSidebar {
   display: flex !important;
 }
 #appShell.mode-sidebar #topNavTabs {
+  display: none !important;
+}
+#appShell.mode-sidebar #headerBrandSwitcher {
+  display: none !important;
+}
+#appShell.mode-sidebar #headerBreadcrumb {
+  display: flex !important;
+}
+#appShell.mode-sidebar #headerPowerActions {
+  display: none !important;
+}
+#appShell.mode-sidebar #statusBadge {
+  display: none !important;
+}
+#appShell.mode-sidebar #headerCmdPalette {
+  display: none !important;
+}
+#appShell.mode-sidebar #hardwareMetersRow {
   display: none !important;
 }
 
@@ -335,5 +353,26 @@ input:focus, select:focus, textarea:focus {
 }
 #appShell.mode-topbar #topNavTabs {
   display: flex !important;
+}
+#appShell.mode-topbar #headerBrandSwitcher {
+  display: flex !important;
+}
+#appShell.mode-topbar #headerBreadcrumb {
+  display: none !important;
+}
+#appShell.mode-topbar #headerPowerActions {
+  display: flex !important;
+}
+#appShell.mode-topbar #statusBadge {
+  display: flex !important;
+}
+#appShell.mode-topbar #headerCmdPalette {
+  display: flex !important;
+}
+#appShell.mode-topbar #hardwareMetersRow {
+  display: grid !important;
+}
+#appShell.mode-topbar #serverHeroCard {
+  display: none !important;
 }
 
