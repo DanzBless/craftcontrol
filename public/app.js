@@ -2142,6 +2142,19 @@ function getFreshSelectedVersion() {
   return sel;
 }
 
+function updateGeyserVisibility() {
+  const geyserBox = document.getElementById('autoEggGeyserToggleContainer');
+  if (geyserBox) {
+    if (currentSelectedEgg === 'paper') {
+      geyserBox.classList.remove('hidden');
+      geyserBox.classList.add('flex');
+    } else {
+      geyserBox.classList.add('hidden');
+      geyserBox.classList.remove('flex');
+    }
+  }
+}
+
 function renderEggCards(eggs) {
   const container = document.getElementById('autoEggOptionsContainer');
   if (!container) return;
@@ -2154,6 +2167,7 @@ function renderEggCards(eggs) {
       <p class="text-[11px] mt-1 ${egg.id === currentSelectedEgg ? 'text-neutral-700' : 'text-neutral-400'} leading-snug">${egg.desc}</p>
     </div>
   `).join('');
+  updateGeyserVisibility();
 }
 
 async function openAutoEggModal() {
@@ -2261,6 +2275,7 @@ async function inspectSelectedWorld() {
 
 function selectEgg(eggId) {
   currentSelectedEgg = eggId;
+  updateGeyserVisibility();
   const cards = document.querySelectorAll('.egg-card');
   cards.forEach(card => {
     const isSelected = card.id === `eggCard-${eggId}`;
@@ -2330,7 +2345,7 @@ async function deployAutoEggServer() {
 
   try {
     playSound('cmd');
-    const enableGeyser = document.getElementById('autoEggEnableGeyser')?.checked !== false;
+    const enableGeyser = currentSelectedEgg === 'paper' && document.getElementById('autoEggEnableGeyser')?.checked !== false;
     const res = await fetch('/api/provision/deploy', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
