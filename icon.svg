@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <defs>
+    <!-- Card Squircle Background -->
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e131d"/>
+      <stop offset="50%" stop-color="#080b11"/>
+      <stop offset="100%" stop-color="#030406"/>
+    </linearGradient>
+
+    <linearGradient id="iconBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155" stop-opacity="0.8"/>
+      <stop offset="50%" stop-color="#1e293b" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.8"/>
+    </linearGradient>
+
+    <!-- Cube Gradients -->
+    <linearGradient id="topFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+
+    <linearGradient id="leftFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+
+    <linearGradient id="rightFace" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <!-- Orbit Gradients -->
+    <linearGradient id="orbitGlowPrimary" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.2"/>
+      <stop offset="35%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="65%" stop-color="#38bdf8" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#818cf8" stop-opacity="0.1"/>
+    </linearGradient>
+
+    <linearGradient id="orbitGlowSecondary" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#a855f7" stop-opacity="0.1"/>
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.85"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0.1"/>
+    </linearGradient>
+
+    <!-- Core Glow Filters -->
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <filter id="halo" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+    </filter>
+  </defs>
+
+  <!-- Squircle Base Frame -->
+  <rect x="16" y="16" width="480" height="480" rx="112" fill="url(#iconBg)" stroke="url(#iconBorder)" stroke-width="3"/>
+
+  <!-- Ambient Backdrop Halo -->
+  <circle cx="256" cy="256" r="130" fill="#38bdf8" opacity="0.12" filter="url(#halo)"/>
+
+  <!-- BACK ORBITS (Rendered Behind Cube) -->
+  <g transform="rotate(-26 256 256)">
+    <!-- Primary Back Orbit Arc -->
+    <path d="M 76 256 A 180 62 0 0 1 436 256" stroke="url(#orbitGlowPrimary)" stroke-width="4" stroke-linecap="round" opacity="0.35" stroke-dasharray="8 6"/>
+  </g>
+
+  <g transform="rotate(34 256 256)">
+    <!-- Secondary Back Orbit Arc -->
+    <path d="M 106 256 A 150 50 0 0 1 406 256" stroke="url(#orbitGlowSecondary)" stroke-width="3" stroke-linecap="round" opacity="0.3"/>
+  </g>
+
+  <!-- THE MINECRAFT CORE CUBE -->
+  <g id="cube">
+    <!-- Top Face -->
+    <polygon points="256,154 342,204 256,254 170,204" fill="url(#topFace)"/>
+    
+    <!-- Top Face Grid / Voxel Accent -->
+    <polygon points="256,154 299,179 256,204 213,179" fill="#ffffff" opacity="0.4"/>
+    <polygon points="256,204 299,229 256,254 213,229" fill="#cbd5e1" opacity="0.25"/>
+
+    <!-- Left Face -->
+    <polygon points="170,204 256,254 256,354 170,304" fill="url(#leftFace)"/>
+    
+    <!-- Left Face Voxel Inset -->
+    <polygon points="170,204 213,229 213,329 170,304" fill="#64748b" opacity="0.4"/>
+    
+    <!-- Right Face -->
+    <polygon points="256,254 342,204 342,304 256,354" fill="url(#rightFace)"/>
+
+    <!-- Right Face Voxel Inset -->
+    <polygon points="299,229 342,204 342,304 299,329" fill="#0f172a" opacity="0.4"/>
+
+    <!-- Cube Bevel Edge Lines -->
+    <line x1="256" y1="154" x2="256" y2="254" stroke="#ffffff" stroke-width="2" opacity="0.7"/>
+    <line x1="170" y1="204" x2="256" y2="254" stroke="#ffffff" stroke-width="1.5" opacity="0.4"/>
+    <line x1="342" y1="204" x2="256" y2="254" stroke="#ffffff" stroke-width="1.5" opacity="0.4"/>
+    <line x1="256" y1="254" x2="256" y2="354" stroke="#38bdf8" stroke-width="2.5" opacity="0.9"/>
+  </g>
+
+  <!-- FRONT ORBITS (Rendered in Front of Cube for 3D Depth) -->
+  <g transform="rotate(-26 256 256)">
+    <!-- Primary Front Orbit Arc (Sweeps across the cube) -->
+    <path d="M 436 256 A 180 62 0 0 1 76 256" stroke="url(#orbitGlowPrimary)" stroke-width="4.5" stroke-linecap="round" filter="url(#glow)"/>
+
+    <!-- Satellite Node on Primary Orbit -->
+    <circle cx="376" cy="296" r="8" fill="#ffffff" filter="url(#glow)"/>
+    <circle cx="376" cy="296" r="14" stroke="#38bdf8" stroke-width="2" opacity="0.7"/>
+    <circle cx="376" cy="296" r="4" fill="#38bdf8"/>
+  </g>
+
+  <g transform="rotate(34 256 256)">
+    <!-- Secondary Front Orbit Arc -->
+    <path d="M 406 256 A 150 50 0 0 1 106 256" stroke="url(#orbitGlowSecondary)" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+    
+    <!-- Secondary Satellite Node -->
+    <circle cx="138" cy="274" r="5" fill="#ffffff"/>
+    <circle cx="138" cy="274" r="9" stroke="#a855f7" stroke-width="1.5" opacity="0.6"/>
+  </g>
+
+  <!-- Sparkle Particle Accents -->
+  <circle cx="210" cy="116" r="2.5" fill="#ffffff" opacity="0.85"/>
+  <circle cx="340" cy="136" r="3" fill="#38bdf8" opacity="0.7"/>
+  <circle cx="120" cy="380" r="2.5" fill="#38bdf8" opacity="0.6"/>
+  <circle cx="390" cy="380" r="2" fill="#ffffff" opacity="0.7"/>
+</svg>
