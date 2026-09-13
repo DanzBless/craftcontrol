@@ -1,58 +1,82 @@
-# CraftOrbit - Universal Minecraft Server Manager & Global Host
+# 🪐 CraftOrbit — Universal Minecraft Server Manager & Global Host
 
-CraftOrbit is an open-source, web-based Minecraft server manager with automatic engine provisioning, playit.gg global tunneling, Modrinth mod store integration, real-time telemetry, and an AI server assistant.
+[![GitHub Release](https://img.shields.io/github/v/release/DanzBless/craftorbit?color=white&label=Release&style=flat-square)](https://github.com/DanzBless/craftorbit/releases/latest)
+[![License: MIT](https://img.shields.io/badge/License-MIT-white.svg?style=flat-square)](LICENSE)
+[![Platform: Windows](https://img.shields.io/badge/Platform-Windows-white.svg?style=flat-square)](https://github.com/DanzBless/craftorbit)
+[![Node.js Version](https://img.shields.io/badge/Node.js-v18%2B-white.svg?style=flat-square)](https://nodejs.org)
+[![Cross-Play: Java %2B Bedrock](https://img.shields.io/badge/Cross--Play-Java%20%2B%20Bedrock-white.svg?style=flat-square)](https://geysermc.org)
+
+**CraftOrbit** is a modern, high-performance, open-source web management panel for hosting Minecraft servers effortlessly on your computer and playing with friends worldwide—**zero router port forwarding required**.
+
+Featuring automated server engine downloading (**Forge, NeoForge, Fabric, Paper, and Vanilla**), dual **playit.gg** tunneling (PC + Mobile), 1-click **GeyserMC & Floodgate** cross-play, in-browser **Modrinth** mod store, and real-time hardware telemetry.
 
 ---
 
 ## ⚡ Quick Start
 
-### Prerequisites
-- **Node.js**: [nodejs.org](https://nodejs.org/) (v18+ recommended)
-- **Java**: Java 8, 17, 21, or 25 depending on your Minecraft version. CraftOrbit will automatically scan your system and choose the best matching runtime.
+### 📋 Prerequisites
+1. **Node.js** (v18 or newer): Download from [nodejs.org](https://nodejs.org/).
+2. **Java Runtime**: CraftOrbit automatically scans and selects your installed Java runtime (`Java 8`, `Java 17`, `Java 21`, or `Java 25` for Minecraft 26.x).
 
-### 1-Click Launch (Windows)
-1. Double-click `setup.bat` (or `start.bat`).
-2. Your browser will automatically open to `http://localhost:3000`.
-3. To run silently in the background with no command prompt window, double-click `start-silent.vbs`.
+### 🚀 1-Click Launch (Windows)
+1. Download **`CraftOrbit-OpenSource-Setup.zip`** from the [Latest Releases](https://github.com/DanzBless/craftorbit/releases/latest).
+2. Extract the archive anywhere on your PC.
+3. Double-click **`setup.bat`** (or `start.bat`).
+4. Your browser will automatically open:
+   👉 **`http://localhost:3000`**
+
+*(Optional: Double-click `start-silent.vbs` to run CraftOrbit completely hidden in the background without keeping a Command Prompt window open).*
 
 ---
 
 ## 🌟 Key Features
 
-- 🎮 **Auto-Egg World Deployer**:
-  - Select any singleplayer world folder or create a fresh world.
-  - Choose your engine: Paper (PaperMC v3), Purpur, Vanilla, or Fabric.
-  - Automatically downloads the correct `.jar`, configures `eula=true` and `server.properties`, and matches the required Java version.
-- 🌍 **playit.gg Global Tunneling**:
-  - Host publicly without port forwarding or sharing your home IP address.
-  - Dual tunnel configuration for both Java Edition (PC) and Bedrock Edition (Mobile / Console).
-  - Tunnels are stored independently per server profile.
-- 📱 **Bedrock / Geyser Cross-play**:
-  - Automatically installs Geyser and Floodgate plugins on Paper/Purpur/Spigot servers.
-- 📦 **Modrinth App Store**:
-  - 1-click mod search and installation directly from the Modrinth catalog.
-  - Toggle installed mods on/off without deleting `.jar` files.
-- 🩺 **AI Copilot & Server Doctor**:
-  - Connects to local or remote 9Router gateway.
-  - Diagnoses server errors, stack traces, and mod conflicts.
-- 📊 **Realtime Telemetry & Server List Ping**:
-  - Live CPU, RAM, and TPS tracker.
-  - Proportional disk analyzer with automated chunk saves and 1-click world backup/restore.
+| Feature | Description |
+| :--- | :--- |
+| 🎮 **Auto-Egg Provisioner** | 1-click server creation. Automatically downloads the official `.jar` for **Forge**, **NeoForge**, **Fabric**, **Paper**, or **Vanilla** directly from official APIs. |
+| 🌍 **Global Tunneling (playit.gg)** | Host public games without touching router NAT/firewalls or leaking your home IP address. Supports separate dual tunnels for PC and Mobile. |
+| 📱 **Java + Bedrock Cross-Play** | Auto-installs **Geyser** and **Floodgate** so friends on Android, iOS, Xbox, PlayStation, and Switch can join your Java Paper server on port `19132`. |
+| 📦 **Modrinth Mod & Pack Store** | Search and install mods directly from the Modrinth catalog with 1 click. Includes `.zip` modpack importer for CurseForge/Modrinth server packs. |
+| ⏱️ **Real-Time Telemetry & SLP** | Live RAM/CPU charts, native Server List Ping (latency ms & player count), and automated 10-minute world saves (`/save-all`). |
+| 🔄 **1-Click Disaster Recovery** | Full world backup creation (`.zip`) with an instant 1-click restore button. |
+| ⌨️ **Spotlight Command Palette** | Press `Ctrl + K` anywhere to trigger server actions, set world time, clear ground lag, and run console commands. |
+| 🔒 **Security Hardened** | Protected against Cross-Site Request Forgery (CSRF/CSWSH), path traversal (CWE-22), and shell command injection. |
 
 ---
 
-## ⚙️ Configuration (Optional)
+## 🕹️ Supported Engines & Versions
 
-Create a `.env` file based on `.env.example` if you want to customize dashboard ports or 9Router AI connection:
-
-```env
-PORT=3000
-NINEROUTER_URL=http://localhost:20128
-NINEROUTER_KEY=
-NINEROUTER_MODEL=ag/gemini-3.8-flash-low
-```
+- **Minecraft Forge**: 1.12.2, 1.16.5, 1.18.2, 1.19.2, 1.20.1 (Automated `--installServer` execution).
+- **NeoForge**: 1.20.4, 1.21.1, 1.26 / 26.2 (Automated Maven installer).
+- **Fabric**: All versions (Automated Fabric Server Launcher & Fabric-API injection).
+- **Paper / Purpur**: High-performance servers with Bukkit/Spigot plugin support.
+- **Mojang Vanilla**: Official `server.jar` packages.
+- **Minecraft Bedrock**: Native Bedrock Dedicated Server support.
 
 ---
 
-## 📄 License
-MIT License. Free and open source.
+## 🤝 Inviting Friends
+
+When your server is online, CraftOrbit provides ready-to-copy join addresses:
+- **🌐 Internet (playit.gg)**: Give this domain (`xyz.gl.joinmc.link`) to friends playing outside your house.
+- **🏠 Home Wi-Fi (LAN)**: Connect with siblings and housemates on the same network (`192.168.x.x:PORT`).
+- **📱 Mobile Bedrock**: Phone and tablet players connect using the Bedrock Server IP and Port.
+
+---
+
+## ❓ Frequently Asked Questions (FAQ)
+
+### How do I host a Minecraft server for free without port forwarding?
+CraftOrbit integrates with `playit.gg` to create encrypted global tunnels. Launch your server in CraftOrbit, start the tunnel, and share the generated public domain with your friends. No router configuration or static IP required.
+
+### Can friends on Bedrock (Mobile / Console) join my Java server?
+Yes. When deploying a Paper or Purpur server in CraftOrbit, check **Auto-install Geyser & Floodgate**. CraftOrbit handles plugin installation and cross-play translation automatically.
+
+### Does CraftOrbit require paid hosting?
+No. CraftOrbit is 100% free and open-source under the MIT license. It runs entirely on your own computer.
+
+---
+
+## 📜 License & Attribution
+Distributed under the **MIT License**. Created by [Naze_Tz](https://github.com/DanzBless).
+Contributions, issues, and feature requests are welcome on [GitHub](https://github.com/DanzBless/craftorbit).
