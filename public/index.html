@@ -1439,10 +1439,18 @@
           </div>
         </div>
 
-        <!-- Progress status display -->
-        <div id="autoEggProgressBox" class="hidden p-3 rounded-lg bg-black border border-[#333] text-xs font-mono text-neutral-300 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
-          <span id="autoEggProgressText">Preparing dependencies...</span>
+        <!-- Progress status display with percentage bar -->
+        <div id="autoEggProgressBox" class="hidden p-3.5 rounded-xl bg-black border border-[#333] text-xs font-mono text-neutral-300 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+              <span id="autoEggProgressText">Preparing dependencies...</span>
+            </span>
+            <span id="autoEggProgressPercent" class="font-bold text-white">0%</span>
+          </div>
+          <div class="w-full bg-[#181818] rounded-full h-1.5 overflow-hidden">
+            <div id="autoEggProgressBar" class="bg-white h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
         </div>
       </div>
 

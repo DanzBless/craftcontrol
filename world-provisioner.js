@@ -126,33 +126,33 @@ class WorldProvisioner {
       availableEggs: [
         {
           id: 'forge',
-          name: 'Forge Modpack Egg',
-          tag: 'Forge Modpacks (RLCraft/ATM/RPG)',
-          desc: 'Automated Forge installer (--installServer) with full mods/ and config/ modpack support.'
+          name: 'Forge',
+          tag: 'Classic Modded',
+          desc: 'Minecraft Forge for classic and heavy modpacks (1.12 - 1.20).'
+        },
+        {
+          id: 'neoforge',
+          name: 'NeoForge',
+          tag: 'Modern Modded',
+          desc: 'NeoForge server engine for modern modpacks (1.20.4+ and 26.x).'
         },
         {
           id: 'fabric',
-          name: 'Fabric Modpack Egg',
-          tag: 'Fabric Modpacks (Cobblemon/BetterMC)',
-          desc: 'Lightweight modern modded server. Auto-installs Fabric Server Launcher & Fabric-API.'
+          name: 'Fabric',
+          tag: 'Fast Modded',
+          desc: 'Lightweight modern modded server with auto-installed Fabric-API.'
         },
         {
           id: 'paper',
-          name: 'Paper Egg (PaperMC)',
-          tag: 'Most Popular & Optimized',
-          desc: 'High-performance Java server with anti-lag & Spigot/Bukkit plugin support. Friends can join with vanilla Minecraft.'
-        },
-        {
-          id: 'purpur',
-          name: 'Purpur Egg',
-          tag: 'Fast Paper Fork',
-          desc: 'Ultra-optimized drop-in replacement for Paper with extra gameplay configs.'
+          name: 'Paper',
+          tag: 'Fast & Plugins',
+          desc: 'High-performance Java server with Bukkit/Spigot plugins.'
         },
         {
           id: 'vanilla',
-          name: 'Vanilla Java Egg',
+          name: 'Vanilla',
           tag: 'Official Mojang',
-          desc: 'Official Minecraft server.jar directly from Mojang.'
+          desc: 'Standard official Minecraft server without mods.'
         }
       ]
     };
@@ -236,14 +236,88 @@ class WorldProvisioner {
     return trimmed;
   }
 
+  static async getLatestNeoForgeVersion(mcVersion) {
+    const url = 'https://maven.neoforged.net/releases/net/neoforged/neoforge/maven-metadata.xml';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Failed to query NeoForge Maven repository');
+    const text = await res.text();
+    const allVersions = [...text.matchAll(/<version>([^<]+)<\/version>/g)].map(m => m[1]);
+
+    let prefix = '';
+    const parts = mcVersion.split('.');
+    if (parts[0] === '26') prefix = '26.' + (parts[1] || '2') + '.';
+    else if (parts[0] === '1' && parts[1] === '26') prefix = '26.' + (parts[2] || '2') + '.';
+    else if (parts[0] === '1' && parseInt(parts[1], 10) >= 20) prefix = parts[1] + '.' + (parts[2] || '0') + '.';
+
+    const matches = allVersions.filter(v => v.startsWith(prefix));
+    if (matches.length > 0) return matches[matches.length - 1];
+    return allVersions[allVersions.length - 1];
+  }
+
+  // Stream downloader with real-time percentage progress
+  static async downloadWithProgress(url, destPath, targetFileName, onProgress = () => {}) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Download failed with HTTP ${res.status} from ${url}`);
+    }
+
+    const totalBytes = parseInt(res.headers.get('content-length') || '0', 10);
+    let loadedBytes = 0;
+    const fileStream = fs.createWriteStream(destPath);
+    const reader = res.body.getReader();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      fileStream.write(Buffer.from(value));
+      loadedBytes += value.length;
+
+      if (totalBytes > 0) {
+        const percent = Math.min(100, Math.round((loadedBytes / totalBytes) * 100));
+        const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(1);
+        const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
+        onProgress({
+          percent,
+          loadedMB,
+          totalMB,
+          text: `[${percent}%] Downloading ${targetFileName} (${loadedMB} / ${totalMB} MB)...`
+        });
+      } else {
+        const loadedMB = (loadedBytes / (1024 * 1024)).toFixed(1);
+        onProgress({
+          percent: -1,
+          loadedMB,
+          text: `Downloading ${targetFileName} (${loadedMB} MB)...`
+        });
+      }
+    }
+
+    await new Promise((resolve, reject) => {
+      fileStream.end(resolve);
+      fileStream.on('error', reject);
+    });
+
+    onProgress({
+      percent: 100,
+      text: `Downloaded ${targetFileName} successfully (${(loadedBytes / (1024 * 1024)).toFixed(1)} MB)`
+    });
+
+    return destPath;
+  }
+
   // Download server jar directly from official APIs based on Egg & Minecraft Version
   static async downloadEggJar(egg, mcVersion, destFolder, onProgress = () => {}) {
     mcVersion = this.normalizeVersion(mcVersion);
     let jarUrl = '';
     let targetFileName = 'server.jar';
 
+    const notify = (msg) => {
+      if (typeof msg === 'string') onProgress({ percent: -1, text: msg });
+      else onProgress(msg);
+    };
+
     if (egg === 'paper') {
-      onProgress(`Querying PaperMC v3 repository for Minecraft ${mcVersion}...`);
+      notify(`Querying PaperMC v3 repository for Minecraft ${mcVersion}...`);
       try {
         const vRes = await fetch(`https://fill.papermc.io/v3/projects/paper/versions/${mcVersion}`);
         if (!vRes.ok) throw new Error(`PaperMC v3 API returned HTTP ${vRes.status}`);
@@ -251,7 +325,6 @@ class WorldProvisioner {
         const builds = vData.builds || [];
         if (builds.length === 0) throw new Error(`No builds found for Paper ${mcVersion}`);
         
-        // Find latest build number
         const latestBuild = Math.max(...builds);
         const bRes = await fetch(`https://fill.papermc.io/v3/projects/paper/versions/${mcVersion}/builds/${latestBuild}`);
         if (!bRes.ok) throw new Error(`Failed to fetch build ${latestBuild}`);
@@ -259,19 +332,18 @@ class WorldProvisioner {
         jarUrl = bData.downloads?.['server:default']?.url || bData.downloads?.['server:mojang']?.url;
         if (!jarUrl) throw new Error(`Download URL missing for Paper build ${latestBuild}`);
         targetFileName = 'server.jar';
-        onProgress(`Found Paper build #${latestBuild}. Starting download...`);
+        notify({ percent: 5, text: `Found Paper build #${latestBuild}. Starting download...` });
       } catch (err) {
-        // Fallback to Purpur if Paper build not found for this subversion
-        onProgress(`Paper specific build not available, falling back to Purpur Paper fork for ${mcVersion}...`);
+        notify({ percent: 5, text: `Paper build not found, falling back to Purpur Paper fork for ${mcVersion}...` });
         jarUrl = `https://api.purpurmc.org/v2/purpur/${mcVersion}/latest/download`;
         targetFileName = 'server.jar';
       }
     } else if (egg === 'purpur') {
-      onProgress(`Connecting to Purpur API for Minecraft ${mcVersion}...`);
+      notify({ percent: 5, text: `Connecting to Purpur API for Minecraft ${mcVersion}...` });
       jarUrl = `https://api.purpurmc.org/v2/purpur/${mcVersion}/latest/download`;
       targetFileName = 'server.jar';
     } else if (egg === 'fabric') {
-      onProgress(`Querying Fabric Meta API for Minecraft ${mcVersion}...`);
+      notify({ percent: 5, text: `Querying Fabric Meta API for Minecraft ${mcVersion}...` });
       const metaRes = await fetch(`https://meta.fabricmc.net/v2/versions/loader/${mcVersion}`);
       if (!metaRes.ok) throw new Error(`Fabric not available for Minecraft ${mcVersion}`);
       const metaJson = await metaRes.json();
@@ -279,9 +351,9 @@ class WorldProvisioner {
       const loaderVer = metaJson[0].loader.version;
       jarUrl = `https://meta.fabricmc.net/v2/versions/loader/${mcVersion}/${loaderVer}/1.0.1/server/jar`;
       targetFileName = 'fabric-server-launcher.jar';
-      onProgress(`Found Fabric loader v${loaderVer}. Starting download...`);
+      notify({ percent: 10, text: `Found Fabric loader v${loaderVer}. Starting download...` });
     } else if (egg === 'vanilla') {
-      onProgress(`Querying Mojang Version Manifest for Minecraft ${mcVersion}...`);
+      notify({ percent: 5, text: `Querying Mojang Version Manifest for Minecraft ${mcVersion}...` });
       const manifestRes = await fetch('https://piston-meta.mojang.com/mc/game/version_manifest_v2.json');
       const manifest = await manifestRes.json();
       const verObj = manifest.versions.find(v => v.id === mcVersion);
@@ -294,9 +366,9 @@ class WorldProvisioner {
       }
       jarUrl = pkg.downloads.server.url;
       targetFileName = 'server.jar';
-      onProgress(`Found official Mojang server package. Starting download...`);
+      notify({ percent: 10, text: `Found official Mojang server package. Starting download...` });
     } else if (egg === 'forge') {
-      onProgress(`Querying Forge Maven promotions for Minecraft ${mcVersion}...`);
+      notify({ percent: 5, text: `Querying Forge Maven promotions for Minecraft ${mcVersion}...` });
       const promoRes = await fetch('https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json');
       if (!promoRes.ok) throw new Error('Failed to query Forge promotions API');
       const promoData = await promoRes.json();
@@ -307,38 +379,41 @@ class WorldProvisioner {
 
       jarUrl = `https://maven.minecraftforge.net/net/minecraftforge/forge/${mcVersion}-${forgeVersion}/forge-${mcVersion}-${forgeVersion}-installer.jar`;
       targetFileName = 'forge-installer.jar';
-      onProgress(`Found Forge ${mcVersion}-${forgeVersion}. Starting installer download...`);
+      notify({ percent: 10, text: `Found Forge ${mcVersion}-${forgeVersion}. Starting installer download...` });
+    } else if (egg === 'neoforge') {
+      notify({ percent: 5, text: `Querying NeoForge Maven repository for Minecraft ${mcVersion}...` });
+      const neoVersion = await this.getLatestNeoForgeVersion(mcVersion);
+      if (!neoVersion) {
+        throw new Error(`No NeoForge build found for Minecraft ${mcVersion}. Recommended: 26.2, 1.21.1, 1.20.4.`);
+      }
+      jarUrl = `https://maven.neoforged.net/releases/net/neoforged/neoforge/${neoVersion}/neoforge-${neoVersion}-installer.jar`;
+      targetFileName = 'neoforge-installer.jar';
+      notify({ percent: 10, text: `Found NeoForge v${neoVersion}. Starting installer download...` });
     } else {
-      throw new Error(`Egg '${egg}' requires manual installer setup. Use Paper, Purpur, Fabric, Forge, or Vanilla.`);
+      throw new Error(`Egg '${egg}' requires manual installer setup. Use Forge, NeoForge, Fabric, Paper, or Vanilla.`);
     }
 
     const outPath = path.join(destFolder, targetFileName);
-    const res = await fetch(jarUrl);
-    if (!res.ok) {
-      throw new Error(`Download failed with HTTP ${res.status} from ${jarUrl}`);
-    }
+    await this.downloadWithProgress(jarUrl, outPath, targetFileName, notify);
 
-    const arrayBuf = await res.arrayBuffer();
-    await fs.promises.writeFile(outPath, Buffer.from(arrayBuf));
-    onProgress(`Downloaded ${targetFileName} successfully (${Math.round(arrayBuf.byteLength / (1024 * 1024))} MB)`);
-
-    // Post-download setup for Forge and Fabric
-    if (egg === 'forge') {
+    // Post-download setup for Forge, NeoForge and Fabric
+    if (egg === 'forge' || egg === 'neoforge') {
+      const installerJar = egg === 'neoforge' ? 'neoforge-installer.jar' : 'forge-installer.jar';
+      const eggTitle = egg === 'neoforge' ? 'NeoForge' : 'Forge';
       const javaPath = JavaResolver.resolveJava(mcVersion);
-      onProgress(`Running Forge installer: ${javaPath} -jar forge-installer.jar --installServer (takes ~1-2 min)...`);
+      notify({ percent: 70, text: `Running ${eggTitle} server installer (${javaPath}). Unpacking libraries (takes ~1-2 min)...` });
       try {
-        await execFilePromise(javaPath, ['-jar', 'forge-installer.jar', '--installServer'], { cwd: destFolder });
-        onProgress('Forge server installation completed successfully!');
-        // Clean up installer jar and log
-        await fs.promises.unlink(path.join(destFolder, 'forge-installer.jar')).catch(() => {});
-        await fs.promises.unlink(path.join(destFolder, 'forge-installer.jar.log')).catch(() => {});
+        await execFilePromise(javaPath, ['-jar', installerJar, '--installServer'], { cwd: destFolder });
+        notify({ percent: 95, text: `${eggTitle} server installation completed successfully!` });
+        await fs.promises.unlink(path.join(destFolder, installerJar)).catch(() => {});
+        await fs.promises.unlink(path.join(destFolder, `${installerJar}.log`)).catch(() => {});
       } catch (err) {
-        throw new Error(`Forge installer failed: ${err.message}`);
+        throw new Error(`${eggTitle} installer failed: ${err.message}`);
       }
     } else if (egg === 'fabric') {
       // Auto-install Fabric-API for Fabric modpacks
       try {
-        onProgress(`Fetching matching Fabric-API for Minecraft ${mcVersion}...`);
+        notify({ percent: 75, text: `Fetching matching Fabric-API for Minecraft ${mcVersion}...` });
         const fApiRes = await fetch('https://api.modrinth.com/v2/project/fabric-api/version', {
           headers: { 'User-Agent': 'CraftControl-Manager/1.0' }
         });
@@ -349,9 +424,9 @@ class WorldProvisioner {
           if (file && file.url) {
             const modsDir = path.join(destFolder, 'mods');
             if (!fs.existsSync(modsDir)) await fs.promises.mkdir(modsDir, { recursive: true });
-            const buf = await (await fetch(file.url)).arrayBuffer();
-            await fs.promises.writeFile(path.join(modsDir, file.filename), Buffer.from(buf));
-            onProgress(`Auto-installed ${file.filename} into mods folder.`);
+            notify({ percent: 85, text: `Downloading ${file.filename}...` });
+            await this.downloadWithProgress(file.url, path.join(modsDir, file.filename), file.filename, notify);
+            notify({ percent: 95, text: `Installed ${file.filename} into mods folder.` });
           }
         }
       } catch (e) {}

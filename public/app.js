@@ -327,6 +327,8 @@ function connectWebSocket() {
         updatePlayitUI(msg.data);
       } else if (msg.type === 'playit_log') {
         renderPlayitLog(msg.data);
+      } else if (msg.type === 'provision_progress') {
+        updateProvisionProgress(msg.data);
       } else if (msg.type === 'telemetry') {
         updateTelemetryUI(msg.data);
       }
@@ -1976,6 +1978,22 @@ function selectEgg(eggId) {
   });
 }
 
+function updateProvisionProgress(data) {
+  const box = document.getElementById('autoEggProgressBox');
+  const text = document.getElementById('autoEggProgressText');
+  const percentText = document.getElementById('autoEggProgressPercent');
+  const bar = document.getElementById('autoEggProgressBar');
+
+  if (box && text) {
+    box.classList.remove('hidden');
+    text.textContent = data.text || 'Preparing dependencies...';
+    if (data.percent >= 0) {
+      if (percentText) percentText.textContent = `${data.percent}%`;
+      if (bar) bar.style.width = `${data.percent}%`;
+    }
+  }
+}
+
 async function deployAutoEggServer() {
   const isFresh = currentAutoEggMode === 'fresh';
   let mcVersion = '';
@@ -2004,10 +2022,13 @@ async function deployAutoEggServer() {
 
   const progressBox = document.getElementById('autoEggProgressBox');
   const progressText = document.getElementById('autoEggProgressText');
-  progressBox.classList.remove('hidden');
-  progressText.textContent = isFresh 
-    ? `Downloading ${currentSelectedEgg.toUpperCase()} (${mcVersion}) engine jar & setting up fresh server...`
-    : `Downloading ${currentSelectedEgg.toUpperCase()} (${mcVersion}) server jar & copying world files... (takes ~15-30s)`;
+  const progressPercent = document.getElementById('autoEggProgressPercent');
+  const progressBar = document.getElementById('autoEggProgressBar');
+
+  if (progressBox) progressBox.classList.remove('hidden');
+  if (progressText) progressText.textContent = `Connecting to ${currentSelectedEgg.toUpperCase()} (${mcVersion}) repository...`;
+  if (progressPercent) progressPercent.textContent = '0%';
+  if (progressBar) progressBar.style.width = '5%';
 
   try {
     playSound('cmd');

@@ -517,7 +517,11 @@ app.post('/api/provision/deploy', async (req, res) => {
       minRam: minRam || '2G',
       enableGeyser: enableGeyser !== false,
       seed: seed || ''
-    }, (log) => console.log(`[Provisioner] ${log}`));
+    }, (progress) => {
+      const data = typeof progress === 'string' ? { text: progress, percent: -1 } : progress;
+      console.log(`[Provisioner] ${data.text}`);
+      broadcast({ type: 'provision_progress', data });
+    });
 
     // Register into instances
     registry.instances.push(newInstance);
