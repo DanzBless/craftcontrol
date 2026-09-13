@@ -405,10 +405,10 @@
         </div>
 
         <!-- Middle: Metric Progress Bars (CPU, RAM, DISK) -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto lg:min-w-[380px] font-mono text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full lg:w-auto lg:min-w-[400px] font-mono text-xs">
           <!-- CPU Metric -->
           <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
-            <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center justify-between text-[11px] whitespace-nowrap gap-2">
               <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="cpu" class="w-3 h-3"></i> CPU</span>
               <span id="heroCpuPercent" class="font-bold text-white">0%</span>
             </div>
@@ -419,7 +419,7 @@
 
           <!-- RAM Metric -->
           <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
-            <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center justify-between text-[11px] whitespace-nowrap gap-2">
               <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="activity" class="w-3 h-3"></i> RAM</span>
               <span id="heroRamUsage" class="font-bold text-white">0 / 6 GB</span>
             </div>
@@ -430,9 +430,9 @@
 
           <!-- DISK Metric -->
           <div class="space-y-1.5 p-3 rounded-xl bg-[#07090e]/80 border border-[#1c2434]">
-            <div class="flex items-center justify-between text-[11px]">
+            <div class="flex items-center justify-between text-[11px] whitespace-nowrap gap-2">
               <span class="text-neutral-400 flex items-center gap-1"><i data-lucide="hard-drive" class="w-3 h-3"></i> DISK</span>
-              <span id="heroDiskUsage" class="font-bold text-white">...</span>
+              <span id="heroDiskUsage" class="font-bold text-white">-- GB</span>
             </div>
             <div class="w-full h-1.5 rounded-full bg-[#18202e] overflow-hidden">
               <div id="heroDiskBar" class="h-full bg-purple-500 rounded-full transition-all duration-300" style="width: 25%"></div>

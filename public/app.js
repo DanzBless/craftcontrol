@@ -617,7 +617,7 @@ function updateTelemetryUI(telemetry) {
 
     const heroDisk = document.getElementById('heroDiskUsage');
     const heroDiskBar = document.getElementById('heroDiskBar');
-    if (heroDisk) heroDisk.textContent = `${freeGb} GB Free`;
+    if (heroDisk) heroDisk.textContent = `${freeGb} GB`;
     if (heroDiskBar) heroDiskBar.style.width = `${telemetry.drive.usedPercent}%`;
   }
 }
