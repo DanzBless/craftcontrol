@@ -1,34 +1,69 @@
-/* Pitch Black & Crisp White Design System */
+/* ==========================================================================
+   CraftOrbit Design System — Modern Cyber-Dark / Obsidian Theme
+   Engineered with UI/UX Pro Max Guidelines
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 :root {
-  --bg-main: #000000;
-  --bg-card: #0a0a0a;
-  --bg-card-hover: #121212;
-  --border-color: #222222;
-  --border-light: #333333;
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  /* Surface & Background System */
+  --bg-main: #07090e;
+  --bg-surface: #0a0d14;
+  --bg-card: rgba(13, 17, 26, 0.75);
+  --bg-card-hover: rgba(20, 26, 38, 0.85);
+  --bg-card-solid: #0d121c;
+  
+  /* Border System */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-light: rgba(255, 255, 255, 0.14);
+  --border-focus: rgba(56, 189, 248, 0.5);
+
+  /* Typography Colors */
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+
+  /* Accent Glow Palette */
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #10b981;
+  --accent-indigo: #818cf8;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
 }
 
+/* Base Body Styling */
 body {
   background-color: var(--bg-main) !important;
   color: var(--text-primary) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.04) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(129, 140, 248, 0.04) 0px, transparent 50%),
+    radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 28px 28px;
+  background-attachment: fixed;
 }
 
-/* Custom scrollbar */
+/* Monospace System */
+.font-mono, kbd, code, pre, .log-line, .cmd-chip {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+}
+
+/* Custom Sleek Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #000000;
+  background: #07090e;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262626;
-  border-radius: 3px;
+  background: #1e293b;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #404040;
+  background: #334155;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -39,124 +74,222 @@ body {
   scrollbar-width: none;
 }
 
-/* Tab button styling - Pure Monochrome */
+/* Glass Card Elevation */
+.bg-brand-card,
+.glass-panel {
+  background-color: var(--bg-card) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-subtle) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.bg-brand-card:hover {
+  border-color: var(--border-light) !important;
+}
+
+/* Header Bar Styling */
+header {
+  background: rgba(7, 9, 14, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid var(--border-subtle) !important;
+}
+
+/* Navigation Tabs — Segmented Control Style */
 .tab-btn {
-  color: #888888;
+  color: var(--text-secondary);
   background-color: transparent;
   border: 1px solid transparent;
   white-space: nowrap;
-  transition: all 0.15s ease;
+  font-weight: 500;
+  transition: all 0.18s ease;
+  position: relative;
 }
 .tab-btn:hover {
   color: #ffffff;
-  background-color: #141414;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 .tab-btn.active {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
+  color: #ffffff !important;
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.22) !important;
   font-weight: 600;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
-#tab-ai.active {
-  color: #000000 !important;
-  background-color: #ffffff !important;
-  border-color: #ffffff !important;
-}
-
-/* Terminal Log Level Highlighting - Monochrome High Contrast */
+/* Terminal & Console Log Stream */
 .log-line {
   white-space: pre-wrap;
   word-break: break-all;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.6;
 }
 .log-error {
-  color: #ffffff !important;
-  background-color: rgba(255, 255, 255, 0.12);
-  padding: 1px 4px;
-  border-left: 2px solid #ffffff;
+  color: #fda4af !important;
+  background-color: rgba(244, 63, 94, 0.12);
+  padding: 2px 6px;
+  border-left: 3px solid #f43f5e;
+  border-radius: 0 4px 4px 0;
+  margin: 1px 0;
 }
 .log-warn {
-  color: #e4e4e7 !important;
-  font-weight: 500;
+  color: #fde047 !important;
+  background-color: rgba(234, 179, 8, 0.08);
+  padding: 1px 6px;
+  border-left: 2px solid #eab308;
+  border-radius: 0 4px 4px 0;
 }
 .log-info {
-  color: #a1a1aa;
+  color: #94a3b8;
 }
 .log-chat {
   color: #ffffff !important;
   font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 4px;
+  border-radius: 4px;
 }
 .log-dash {
-  color: #71717a !important;
+  color: #38bdf8 !important;
   font-style: italic;
 }
 
-/* Pulse animation for running status - White glow */
-@keyframes pulse-white {
+/* Pulse Animations for Running Status */
+@keyframes pulse-emerald {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
   }
   50% {
-    box-shadow: 0 0 0 5px rgba(255, 255, 255, 0);
+    box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+  }
+}
+
+@keyframes pulse-amber {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0);
   }
 }
 
 .pulse-active {
-  animation: pulse-white 2s infinite;
+  animation: pulse-emerald 2s infinite;
 }
 
-/* Mod switch toggle - Black & White */
+.pulse-starting {
+  animation: pulse-amber 1.5s infinite;
+}
+
+/* Mod Switch Toggle */
 .mod-toggle {
   appearance: none;
-  width: 36px;
-  height: 20px;
-  background-color: #262626;
+  width: 38px;
+  height: 22px;
+  background-color: #1e293b;
   border-radius: 9999px;
   position: relative;
   cursor: pointer;
   outline: none;
-  transition: background-color 0.2s;
-  border: 1px solid #333333;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .mod-toggle:checked {
-  background-color: #ffffff;
-  border-color: #ffffff;
+  background-color: #10b981;
+  border-color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
 }
 .mod-toggle::before {
   content: '';
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  background-color: #71717a;
-  transition: transform 0.2s;
+  background-color: #94a3b8;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s;
 }
 .mod-toggle:checked::before {
-  background-color: #000000;
+  background-color: #ffffff;
   transform: translateX(16px);
 }
 
-/* AI message markdown & command chip */
+/* Command Chips */
 .cmd-chip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  background-color: #141414;
-  border: 1px solid #333333;
-  color: #ffffff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  gap: 5px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 6px;
   font-size: 11px;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
 }
 .cmd-chip:hover {
   background-color: #ffffff;
   border-color: #ffffff;
   color: #000000;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
+}
+
+/* Modal Window Glass Backdrop */
+.modal-overlay {
+  background: rgba(3, 5, 8, 0.75) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.modal-content {
+  background: #0d121c !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  border-radius: 16px !important;
+}
+
+/* Action Button Micro-Interactions */
+button {
+  transition: transform 0.12s ease, opacity 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* Input Fields Styling */
+input[type="text"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+select,
+textarea {
+  background-color: #090c13 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #f8fafc !important;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  border-color: var(--accent-cyan) !important;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2) !important;
+}
+
+/* Quick Status Badges */
+.badge-online {
+  background: rgba(16, 185, 129, 0.12);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.badge-offline {
+  background: rgba(244, 63, 94, 0.1);
+  color: #fb7185;
+  border: 1px solid rgba(244, 63, 94, 0.2);
+}
+.badge-starting {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.25);
 }
