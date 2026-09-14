@@ -110,37 +110,60 @@ class PlayitManager {
   }
 
   async findExecutable() {
+    const isWindows = process.platform === 'win32';
+    const binaryName = isWindows ? 'playit.exe' : 'playit';
+
     // 1. Check local tools folder
-    const localExe = path.join(__dirname, 'tools', 'playit.exe');
+    const localExe = path.join(__dirname, 'tools', binaryName);
     if (fs.existsSync(localExe)) return localExe;
 
     // 2. Check standard installation path
-    const installedExe = 'C:\\Program Files\\playit_gg\\bin\\playit.exe';
-    if (fs.existsSync(installedExe)) return installedExe;
+    if (isWindows) {
+      const installedExe = 'C:\\Program Files\\playit_gg\\bin\\playit.exe';
+      if (fs.existsSync(installedExe)) return installedExe;
+    } else {
+      const linuxPaths = ['/usr/local/bin/playit', '/usr/bin/playit', '/opt/playit/playit'];
+      for (const p of linuxPaths) {
+        if (fs.existsSync(p)) return p;
+      }
+    }
 
     // 3. Check system PATH
     try {
-      const { stdout } = await execPromise('where playit.exe');
+      const checkCmd = isWindows ? 'where playit.exe' : 'which playit';
+      const { stdout } = await execPromise(checkCmd);
       if (stdout && stdout.trim()) {
         const first = stdout.trim().split(/\r?\n/)[0];
         if (fs.existsSync(first)) return first;
       }
     } catch (e) {}
 
-    // 4. Download playit.exe automatically if missing
+    // 4. Download playit binary automatically if missing
     return await this.downloadPlayitBinary();
   }
 
   async downloadPlayitBinary() {
+    const isWindows = process.platform === 'win32';
+    const isArm = process.arch === 'arm64';
+    const binaryName = isWindows ? 'playit.exe' : 'playit';
     const toolsDir = path.join(__dirname, 'tools');
+
     if (!fs.existsSync(toolsDir)) {
       await fs.promises.mkdir(toolsDir, { recursive: true });
     }
-    const exePath = path.join(toolsDir, 'playit.exe');
+    const exePath = path.join(toolsDir, binaryName);
     if (fs.existsSync(exePath)) return exePath;
 
-    this.appendLog('[playit.gg] Downloading official playit agent binary from GitHub...');
-    const downloadUrl = 'https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-windows-x86_64.exe';
+    let downloadUrl = '';
+    if (isWindows) {
+      downloadUrl = 'https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-windows-x86_64.exe';
+    } else if (isArm) {
+      downloadUrl = 'https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-linux-aarch64';
+    } else {
+      downloadUrl = 'https://github.com/playit-cloud/playit-agent/releases/download/v1.0.10/playit-linux-x86_64';
+    }
+
+    this.appendLog(`[playit.gg] Downloading official playit agent (${isWindows ? 'Windows' : 'Linux'}) from GitHub...`);
 
     const res = await fetch(downloadUrl);
     if (!res.ok) {
@@ -149,7 +172,15 @@ class PlayitManager {
 
     const buf = await res.arrayBuffer();
     await fs.promises.writeFile(exePath, Buffer.from(buf));
-    this.appendLog('[playit.gg] Download complete: playit.exe is ready.');
+
+    // Ensure executable permissions on Linux/macOS
+    if (!isWindows) {
+      try {
+        await fs.promises.chmod(exePath, 0o755);
+      } catch (e) {}
+    }
+
+    this.appendLog(`[playit.gg] Download complete: ${binaryName} is ready.`);
     return exePath;
   }
 

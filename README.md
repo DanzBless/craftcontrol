@@ -19,13 +19,35 @@ Featuring automated server engine downloading (**Forge, NeoForge, Fabric, Paper,
 2. **Java Runtime**: CraftOrbit automatically scans and selects your installed Java runtime (`Java 8`, `Java 17`, `Java 21`, or `Java 25` for Minecraft 26.x).
 
 ### 🚀 1-Click Launch (Windows)
-1. Download **`CraftOrbit-OpenSource-Setup.zip`** from the [Latest Releases](https://github.com/DanzBless/craftorbit/releases/latest).
+1. Download **`CraftOrbit-v1.3.0-Windows.zip`** from [Releases](https://github.com/DanzBless/craftorbit/releases/latest).
 2. Extract the archive anywhere on your PC.
 3. Double-click **`setup.bat`** (or `start.bat`).
-4. Your browser will automatically open:
-   👉 **`http://localhost:3000`**
+4. Dashboard opens automatically: 👉 **`http://localhost:3000`**
 
-*(Optional: Double-click `start-silent.vbs` to run CraftOrbit completely hidden in the background without keeping a Command Prompt window open).*
+*(Optional: Double-click `start-silent.vbs` to run CraftOrbit hidden in the background without keeping a CMD window open).*
+
+### 🐧 Linux / Ubuntu Server (CLI & 24/7 Hosting)
+1. Download or clone on your Ubuntu machine:
+   ```bash
+   wget https://github.com/DanzBless/craftorbit/releases/download/v1.3.0/CraftOrbit-v1.3.0-Linux-Server.tar.gz
+   mkdir -p craftorbit && tar -xzf CraftOrbit-v1.3.0-Linux-Server.tar.gz -C craftorbit
+   cd craftorbit
+   ```
+2. Run automated setup:
+   ```bash
+   chmod +x setup.sh start.sh
+   ./setup.sh
+   ```
+3. Start the dashboard:
+   ```bash
+   ./start.sh
+   ```
+4. *(Optional) Run as 24/7 Systemd Service on Boot:*
+   ```bash
+   sudo cp craftorbit.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now craftorbit
+   ```
 
 ---
 

@@ -6,12 +6,23 @@ class JavaResolver {
   // Scan system for all available Java installations
   static scanInstalledJavas() {
     const list = [];
-    const roots = [
+    const isWindows = process.platform === 'win32';
+    const binName = isWindows ? 'java.exe' : 'java';
+
+    const roots = isWindows ? [
       path.join(os.homedir(), 'AppData', 'Roaming', 'ModrinthApp', 'meta', 'java_versions'),
       'C:\\Program Files\\Java',
       'C:\\Program Files (x86)\\Java',
       path.join(os.homedir(), '.gradle', 'jdks'),
       path.join(os.homedir(), 'curseforge', 'minecraft', 'Install', 'java')
+    ] : [
+      '/usr/lib/jvm',
+      '/opt/java',
+      '/opt/jdk',
+      '/usr/lib/sdk',
+      path.join(os.homedir(), '.sdkman', 'candidates', 'java'),
+      path.join(os.homedir(), '.gradle', 'jdks'),
+      path.join(os.homedir(), '.local', 'share', 'ModrinthApp', 'meta', 'java_versions')
     ];
 
     for (const root of roots) {
@@ -20,13 +31,13 @@ class JavaResolver {
           const entries = fs.readdirSync(root, { withFileTypes: true });
           for (const ent of entries) {
             if (ent.isDirectory()) {
-              const javaExe = path.join(root, ent.name, 'bin', 'java.exe');
-              if (fs.existsSync(javaExe)) {
-                const match = ent.name.match(/zulu(\d+)|jdk-?(\d+)|jre-?1\.?(\d+)|jre_?(\d+)|adoptium-?(\d+)/i);
-                const major = match ? parseInt(match[1] || match[2] || match[3] || match[4] || match[5], 10) : null;
+              const javaBin = path.join(root, ent.name, 'bin', binName);
+              if (fs.existsSync(javaBin)) {
+                const match = ent.name.match(/zulu(\d+)|jdk-?(\d+)|jre-?1\.?(\d+)|jre_?(\d+)|adoptium-?(\d+)|openjdk-?(\d+)|java-(\d+)/i);
+                const major = match ? parseInt(match[1] || match[2] || match[3] || match[4] || match[5] || match[6] || match[7], 10) : null;
                 list.push({
                   major,
-                  path: javaExe,
+                  path: javaBin,
                   name: ent.name
                 });
               }

@@ -344,8 +344,9 @@ class MinecraftServer {
       spawnCmd = javaCmd;
 
       if (serverType === 'forge' || serverType === 'neoforge') {
-        // Find win_args.txt
-        let winArgs = '';
+        // Find win_args.txt (Windows) or unix_args.txt (Linux/macOS)
+        const argsFileName = process.platform === 'win32' ? 'win_args.txt' : 'unix_args.txt';
+        let foundArgs = '';
         const forgeDir = path.join(this.serverDir, 'libraries/net/minecraftforge/forge');
         const neoDir = path.join(this.serverDir, 'libraries/net/neoforged/forge');
         const searchDir = fs.existsSync(neoDir) ? neoDir : forgeDir;
@@ -353,21 +354,21 @@ class MinecraftServer {
         if (fs.existsSync(searchDir)) {
           const versions = fs.readdirSync(searchDir);
           for (const v of versions) {
-            const potential = path.join(searchDir, v, 'win_args.txt');
+            const potential = path.join(searchDir, v, argsFileName);
             if (fs.existsSync(potential)) {
-              winArgs = `@libraries/${path.relative(path.join(this.serverDir, 'libraries'), potential).replace(/\\/g, '/')}`;
+              foundArgs = `@libraries/${path.relative(path.join(this.serverDir, 'libraries'), potential).replace(/\\/g, '/')}`;
               break;
             }
           }
         }
 
-        if (winArgs) {
+        if (foundArgs) {
           spawnArgs = [
             `-Xms${this.config.minRam}`,
             `-Xmx${this.config.maxRam}`,
             '-Dlog4j2.formatMsgNoLookups=true',
             '@user_jvm_args.txt',
-            winArgs,
+            foundArgs,
             'nogui'
           ];
         } else if (fs.existsSync(path.join(this.serverDir, 'forge.jar'))) {
@@ -512,19 +513,44 @@ class MinecraftServer {
       return { memoryBytes: 0, memoryMB: 0, cpuPercent: 0 };
     }
 
+    // Windows metric collection via PowerShell
+    if (process.platform === 'win32') {
+      return new Promise((resolve) => {
+        const cmd = `Get-Process -Id ${this.pid} -ErrorAction SilentlyContinue | Select-Object -Property WorkingSet64, CPU | ConvertTo-Json`;
+        exec(`powershell -NoProfile -Command "${cmd}"`, { timeout: 3000 }, (err, stdout) => {
+          if (err || !stdout.trim()) {
+            return resolve({ memoryBytes: 0, memoryMB: 0, cpuPercent: 0 });
+          }
+          try {
+            const data = JSON.parse(stdout);
+            const bytes = data.WorkingSet64 || 0;
+            resolve({
+              memoryBytes: bytes,
+              memoryMB: Math.round(bytes / (1024 * 1024)),
+              cpuTime: data.CPU || 0
+            });
+          } catch (e) {
+            resolve({ memoryBytes: 0, memoryMB: 0, cpuPercent: 0 });
+          }
+        });
+      });
+    }
+
+    // Linux / Ubuntu Server native process inspection (ps rss in KB)
     return new Promise((resolve) => {
-      const cmd = `Get-Process -Id ${this.pid} -ErrorAction SilentlyContinue | Select-Object -Property WorkingSet64, CPU | ConvertTo-Json`;
-      exec(`powershell -NoProfile -Command "${cmd}"`, { timeout: 3000 }, (err, stdout) => {
+      exec(`ps -o rss=,pcpu= -p ${this.pid}`, { timeout: 2000 }, (err, stdout) => {
         if (err || !stdout.trim()) {
           return resolve({ memoryBytes: 0, memoryMB: 0, cpuPercent: 0 });
         }
         try {
-          const data = JSON.parse(stdout);
-          const bytes = data.WorkingSet64 || 0;
+          const parts = stdout.trim().split(/\s+/);
+          const rssKB = parseInt(parts[0], 10) || 0;
+          const cpu = parseFloat(parts[1]) || 0;
+          const bytes = rssKB * 1024;
           resolve({
             memoryBytes: bytes,
             memoryMB: Math.round(bytes / (1024 * 1024)),
-            cpuTime: data.CPU || 0
+            cpuPercent: cpu
           });
         } catch (e) {
           resolve({ memoryBytes: 0, memoryMB: 0, cpuPercent: 0 });
